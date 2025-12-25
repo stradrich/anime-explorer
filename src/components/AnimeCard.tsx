@@ -33,7 +33,7 @@ export default function AnimeCard({ anime }: Props){
                             justifyContent: "space-between",
                         }}
                     >
-                        <span>{anime.score}</span>
+                        <span>{anime.score?.toFixed(1)}</span>
                         <span>{anime.year}</span>
                     </div>
                 </div>
