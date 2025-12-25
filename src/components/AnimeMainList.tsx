@@ -2,10 +2,15 @@ import LoadingSkeleton from "../components/ui/loading-skeleton"
 import AnimeCard from "./AnimeCard"
 import type { Anime } from "../types/anime"
 import { mockAnimeArr } from "../types/mockData/anime"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 export default function AnimeMainList() {
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    setTimeout(() => setLoading(false), 100);
+  }, []);
 
   return (
     <section className="container">
