@@ -1,174 +1,31 @@
 import type { AnimeDetail } from "../anime-detail";
 
-export const mockAnimeDetail: AnimeDetail[] = [
-  {
-    id: 1,
-    title: "Test 1",
-    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s",
-    synopsis: "Synopsis for Test 1",
-    background: "Background info for Test 1",
-    score: 8.1,
-    year: 2001,
-    episodes: 12,
-    duration: "24 min per ep",
-    rating: "PG-13",
-    genres: ["Action", "Adventure"],
-    studios: ["Studio A"],
-    producers: ["Producer A"]
-  },
-  {
-    id: 2,
-    title: "Test 2",
-    imageUrl: "...",
-    synopsis: "Synopsis for Test 2",
-    background: "Background info for Test 2",
-    score: 7.5,
-    year: 2002,
-    episodes: 24,
-    duration: "24 min per ep",
-    rating: "PG-13",
-    genres: ["Fantasy", "Comedy"],
-    studios: ["Studio B"],
-    producers: ["Producer B"]
-  },
-  {
-    id: 3,
-    title: "Test 3",
-    imageUrl: "...",
-    synopsis: "Synopsis for Test 3",
-    background: "Background info for Test 3",
-    score: 9.0,
-    year: 2003,
-    episodes: 13,
-    duration: "25 min per ep",
-    rating: "R - 17+",
-    genres: ["Sci-Fi", "Drama"],
-    studios: ["Studio C"],
-    producers: ["Producer C"]
-  },
-  {
-    id: 4,
-    title: "Test 4",
-    imageUrl: "...",
-    synopsis: "Synopsis for Test 4",
-    background: "Background info for Test 4",
-    score: 8.3,
-    year: 2004,
-    episodes: 26,
-    duration: "24 min per ep",
-    rating: "PG-13",
-    genres: ["Action", "Mystery"],
-    studios: ["Studio D"],
-    producers: ["Producer D"]
-  },
-  {
-    id: 5,
-    title: "Test 5",
-    imageUrl: "...",
-    synopsis: "Synopsis for Test 5",
-    background: "Background info for Test 5",
-    score: 7.9,
-    year: 2005,
-    episodes: 12,
-    duration: "23 min per ep",
-    rating: "PG-13",
-    genres: ["Adventure", "Comedy"],
-    studios: ["Studio E"],
-    producers: ["Producer E"]
-  },
-  {
-    id: 6,
-    title: "Test 6",
-    imageUrl: "...",
-    synopsis: "Synopsis for Test 6",
-    background: "Background info for Test 6",
-    score: 8.7,
-    year: 2006,
-    episodes: 24,
-    duration: "24 min per ep",
-    rating: "R - 17+",
-    genres: ["Drama", "Fantasy"],
-    studios: ["Studio F"],
-    producers: ["Producer F"]
-  },
-  {
-    id: 7,
-    title: "Test 7",
-    imageUrl: "...",
-    synopsis: "Synopsis for Test 7",
-    background: "Background info for Test 7",
-    score: 8.0,
-    year: 2007,
-    episodes: 12,
-    duration: "25 min per ep",
-    rating: "PG-13",
-    genres: ["Action", "Sci-Fi"],
-    studios: ["Studio G"],
-    producers: ["Producer G"]
-  },
-  {
-    id: 8,
-    title: "Test 8",
-    imageUrl: "...",
-    synopsis: "Synopsis for Test 8",
-    background: "Background info for Test 8",
-    score: 9.2,
-    year: 2008,
-    episodes: 24,
-    duration: "24 min per ep",
-    rating: "PG-13",
-    genres: ["Thriller", "Mystery"],
-    studios: ["Studio H"],
-    producers: ["Producer H"]
-  },
-  {
-    id: 9,
-    title: "Test 9",
-    imageUrl: "...",
-    synopsis: "Synopsis for Test 9",
-    background: "Background info for Test 9",
-    score: 7.8,
-    year: 2009,
-    episodes: 13,
-    duration: "24 min per ep",
-    rating: "PG-13",
-    genres: ["Adventure", "Fantasy"],
-    studios: ["Studio I"],
-    producers: ["Producer I"]
-  },
-  {
-    id: 10,
-    title: "Test 10",
-    imageUrl: "...",
-    synopsis: "Synopsis for Test 10",
-    background: "Background info for Test 10",
-    score: 8.5,
-    year: 2010,
-    episodes: 12,
-    duration: "24 min per ep",
-    rating: "PG-13",
-    genres: ["Action", "Comedy"],
-    studios: ["Studio J"],
-    producers: ["Producer J"]
-  },
+const IMAGE =
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s";
 
-  ...Array.from({ length: 20 }, (_, i) => {
-    const id = i + 11;
+export const mockAnimeDetail: AnimeDetail[] = Array.from(
+  { length: 100 },
+  (_, i): AnimeDetail => {
+    const id = i + 1;
     return {
       id,
       title: `Test ${id}`,
-      imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s",
+      imageUrl: IMAGE,
       synopsis: `Synopsis for Test ${id}`,
       background: `Background info for Test ${id}`,
-      score: Number((7.5 + (id % 5) * 0.3).toFixed(1)),
-      year: 2010 + id,
-      episodes: id % 2 === 0 ? 24 : 12,
+      score: Number((7.2 + (id % 6) * 0.3).toFixed(1)),
+      year: 2000 + (id % 25),
+      episodes: id % 3 === 0 ? 24 : 12,
       duration: "24 min per ep",
-      rating: id % 3 === 0 ? "R - 17+" : "PG-13",
-      genres: ["Action", "Drama"],
-      studios: [`Studio ${String.fromCharCode(64 + (id % 26 || 26))}`],
+      rating: id % 4 === 0 ? "R - 17+" : "PG-13",
+      genres:
+        id % 5 === 0
+          ? ["Drama", "Thriller"]
+          : id % 3 === 0
+          ? ["Action", "Fantasy"]
+          : ["Adventure", "Comedy"],
+      studios: [`Studio ${String.fromCharCode(65 + (id % 26))}`],
       producers: [`Producer ${id}`],
     };
-  }),
-];
-
+  }
+);
