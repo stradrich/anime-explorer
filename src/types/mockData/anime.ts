@@ -1,34 +1,21 @@
 import type { Anime } from "../anime";
 
-export const mockAnimeArr: Anime[] = [
-  { id: 1, title: "Test 1", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 8.1, year: 2001, genres: ["Action", "Adventure"] },
-  { id: 2, title: "Test 2", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 7.5, year: 2002, genres: ["Fantasy", "Comedy"] },
-  { id: 3, title: "Test 3", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 9.0, year: 2003, genres: ["Sci-Fi", "Drama"] },
-  { id: 4, title: "Test 4", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 8.3, year: 2004, genres: ["Action", "Mystery"] },
-  { id: 5, title: "Test 5", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 7.9, year: 2005, genres: ["Adventure", "Comedy"] },
-  { id: 6, title: "Test 6", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 8.7, year: 2006, genres: ["Drama", "Fantasy"] },
-  { id: 7, title: "Test 7", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 8.0, year: 2007, genres: ["Action", "Sci-Fi"] },
-  { id: 8, title: "Test 8", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 9.2, year: 2008, genres: ["Thriller", "Mystery"] },
-  { id: 9, title: "Test 9", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 7.8, year: 2009, genres: ["Adventure", "Fantasy"] },
-  { id: 10, title: "Test 10", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 8.5, year: 2010, genres: ["Action", "Comedy"] },
-  { id: 11, title: "Test 11", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 8.2, year: 2011, genres: ["Drama", "Romance"] },
-  { id: 12, title: "Test 12", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 7.6, year: 2012, genres: ["Comedy", "Slice of Life"] },
-  { id: 13, title: "Test 13", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 8.9, year: 2013, genres: ["Action", "Fantasy"] },
-  { id: 14, title: "Test 14", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 7.3, year: 2014, genres: ["Sports", "Drama"] },
-  { id: 15, title: "Test 15", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 8.6, year: 2015, genres: ["Sci-Fi", "Thriller"] },
-  { id: 16, title: "Test 16", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 7.9, year: 2016, genres: ["Adventure", "Fantasy"] },
-  { id: 17, title: "Test 17", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 8.4, year: 2017, genres: ["Action", "Supernatural"] },
-  { id: 18, title: "Test 18", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 9.1, year: 2018, genres: ["Mystery", "Psychological"] },
-  { id: 19, title: "Test 19", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 7.7, year: 2019, genres: ["Comedy", "School"] },
-  { id: 20, title: "Test 20", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 8.8, year: 2020, genres: ["Action", "Drama"] },
-  { id: 21, title: "Test 21", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 8.0, year: 2021, genres: ["Fantasy", "Adventure"] },
-  { id: 22, title: "Test 22", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 7.4, year: 2021, genres: ["Romance", "Drama"] },
-  { id: 23, title: "Test 23", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 8.6, year: 2022, genres: ["Sci-Fi", "Action"] },
-  { id: 24, title: "Test 24", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 7.8, year: 2022, genres: ["Comedy", "Fantasy"] },
-  { id: 25, title: "Test 25", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 9.0, year: 2023, genres: ["Drama", "Thriller"] },
-  { id: 26, title: "Test 26", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 8.1, year: 2023, genres: ["Action", "Fantasy"] },
-  { id: 27, title: "Test 27", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 7.6, year: 2024, genres: ["Slice of Life", "Comedy"] },
-  { id: 28, title: "Test 28", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 8.9, year: 2024, genres: ["Mystery", "Supernatural"] },
-  { id: 29, title: "Test 29", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 7.5, year: 2024, genres: ["Sports", "Action"] },
-  { id: 30, title: "Test 30", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s", score: 8.7, year: 2025, genres: ["Adventure", "Drama"] },
-];
+const IMAGE =
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s";
+
+export const mockAnimeArr: Anime[] = Array.from({ length: 100 }, (_, i): Anime => {
+  const id = i + 1;
+  return {
+    id,
+    title: `Test ${id}`,
+    imageUrl: IMAGE,
+    score: Number((7.2 + (id % 6) * 0.3).toFixed(1)),
+    year: 2000 + (id % 25),
+    genres:
+      id % 5 === 0
+        ? ["Drama", "Thriller"]
+        : id % 3 === 0
+        ? ["Action", "Fantasy"]
+        : ["Adventure", "Comedy"],
+  };
+});
