@@ -151,5 +151,24 @@ export const mockAnimeDetail: AnimeDetail[] = [
     studios: ["Studio J"],
     producers: ["Producer J"]
   },
+
+  ...Array.from({ length: 20 }, (_, i) => {
+    const id = i + 11;
+    return {
+      id,
+      title: `Test ${id}`,
+      imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s",
+      synopsis: `Synopsis for Test ${id}`,
+      background: `Background info for Test ${id}`,
+      score: Number((7.5 + (id % 5) * 0.3).toFixed(1)),
+      year: 2010 + id,
+      episodes: id % 2 === 0 ? 24 : 12,
+      duration: "24 min per ep",
+      rating: id % 3 === 0 ? "R - 17+" : "PG-13",
+      genres: ["Action", "Drama"],
+      studios: [`Studio ${String.fromCharCode(64 + (id % 26 || 26))}`],
+      producers: [`Producer ${id}`],
+    };
+  }),
 ];
 

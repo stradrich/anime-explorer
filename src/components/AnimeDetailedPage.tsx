@@ -1,9 +1,15 @@
 import { useNavigate, useParams } from "react-router-dom"
 import { mockAnimeDetail } from "../types/mockData/anime-detail";
+import { useState } from "react";
+import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
+import { useFavourites } from "../context/FavouritesContext";
 
 export default function AnimeDetailedPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  // const [isFavourite, setIsFavourite] = useState(false);
+  const { favourites, toggleFavourite } = useFavourites();
+
 
   const anime = mockAnimeDetail.find(
     (anime) => anime.id === Number(id)
@@ -13,11 +19,27 @@ export default function AnimeDetailedPage() {
     return <p>Anime not found</p>;
   }
 
+  // const toggleFavourite = () => setIsFavourite(!isFavourite);
+   const isFavourite = favourites.includes(anime.id);
+
   return (
     <div>
       <button onClick={() => navigate(-1)}>
         Back
       </button>
+
+       <button
+        onClick={() => toggleFavourite(anime.id)}
+        style={{
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          fontSize: "1.5rem",
+          color: isFavourite ? "red" : "gray",
+        }}
+      >
+      {isFavourite ? <AiFillHeart /> : <AiOutlineHeart />}
+    </button>
 
       <div>
           {/* Anime Image */}

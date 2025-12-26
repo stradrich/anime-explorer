@@ -63,7 +63,7 @@ export default function AnimeMainList() {
             cursor: "not-allowed",
           }}
         >
-          Loading...
+          Load more
         </button>
       </div>
     </section>
