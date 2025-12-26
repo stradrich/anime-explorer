@@ -1,7 +1,11 @@
-export default function LoadingSkeleton() {
+type LoadingSkeletonProps = {
+  count?: number;
+};
+
+export default function LoadingSkeleton({ count = 1 }: LoadingSkeletonProps) {
   return (
-    <div style={{ display: "grid", gap: "1rem", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}>
-      {Array.from({ length: 10 }).map((_, i) => (
+    <>
+      {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
           style={{
@@ -12,6 +16,6 @@ export default function LoadingSkeleton() {
           }}
         />
       ))}
-    </div>
+    </>
   )
 }
