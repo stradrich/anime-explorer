@@ -3,29 +3,28 @@ import AnimeCard from "./AnimeCard";
 // import { mockAnimeArr } from "../types/mockData/anime"; // keep for reference
 import { useFavourites } from "../context/FavouritesContext";
 import { useAnime } from "../context/AnimeContext";
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useMemo, useState, useEffect } from "react";
 
 export default function FavoritePage() {
   const { favourites, clearFavourites } = useFavourites();
-  const { topAnime, fetchNextPage } = useAnime();
-  const [loading, setLoading] = useState(false);
+  const { topAnime } = useAnime();
+  const [loading, setLoading] = useState(true);
 
   console.log(favourites);
   
-  // Keep favourites in sync with localStorage + other tabs
-  const [favouriteAnimes, setFavouriteAnimes] = useState(
-    topAnime.filter((anime) => favourites.includes(anime.id))
-  );
+  // Keep favourites in sync and avoid duplicates
+  const favouriteAnimes = useMemo(() => {
+    const uniqueAnimesMap = new Map<number, typeof topAnime[0]>();
+    favourites.forEach((favId) => {
+      const anime = topAnime.find((a) => a.id === favId);
+      if (anime) uniqueAnimesMap.set(favId, anime);
+    });
+    return Array.from(uniqueAnimesMap.values());
+  }, [favourites, topAnime]);
 
-  // Update favouriteAnimes whenever topAnime or favourites change
+  // Simulate a loading skeleton for better UX
   useEffect(() => {
-    setFavouriteAnimes(topAnime.filter((anime) => favourites.includes(anime.id)));
-  }, [topAnime, favourites]);
-
-  // Handle loading on mount
-  useEffect(() => {
-    setLoading(true);
     const t = setTimeout(() => setLoading(false), 100);
     return () => clearTimeout(t);
   }, []);
@@ -47,11 +46,17 @@ export default function FavoritePage() {
       ) : (
         <div>
           {loading ? (
-            <LoadingSkeleton />
+            <LoadingSkeleton count={8} />
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "1rem" }}>
-              {favouriteAnimes.map((anime, index) => (
-                <AnimeCard key={`${anime.id}-${index}`} anime={anime} />
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+                gap: "1rem",
+              }}
+            >
+              {favouriteAnimes.map((anime) => (
+                <AnimeCard key={anime.id} anime={anime} />
               ))}
             </div>
           )}
