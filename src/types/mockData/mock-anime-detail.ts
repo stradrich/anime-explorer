@@ -1,4 +1,4 @@
-import type { AnimeDetail } from "../anime-detail";
+import type { AnimeDetail } from "../mock-anime-detail";
 
 const IMAGE =
   "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_UcbzOVEtzpiThlTe9udnaG2pOL1GIYXnTw&s";
