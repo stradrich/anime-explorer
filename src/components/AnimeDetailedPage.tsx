@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import { useFavourites } from "../context/FavouritesContext";
 import { useAnime } from "../context/AnimeContext";
-import type { AnimeDetail } from "../api/jikan";
+import type { AnimeDetail } from "../api/dataTypes";
 
 export default function AnimeDetailedPage() {
   const { id } = useParams();

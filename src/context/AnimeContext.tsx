@@ -1,25 +1,29 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
-import type { Anime, AnimeDetail } from "../api/jikan";
-import { fetchTopAnime, 
-          // fetchAnimeById as fetchAnimeByIdApi
-        } from "../api/jikan";
+import type { Anime, AnimeDetail } from "../api/dataTypes";
+import { fetchAllAnime, fetchAllGenres, fetchAnimeById as fetchAnimeByIdApi, type RawGenre } from "../api/jikan";
 
 interface AnimeContextType {
-  topAnime: Anime[];
+  allAnime: Anime[];
   animeById: Record<number, AnimeDetail>;
   fetchNextPage: () => Promise<void>;
-  // fetchAnimeById: (id: number) => Promise<void>;
+  fetchAnimeById: (id: number) => Promise<void>;
   loading: boolean;
+  genreOptions: RawGenre[];
 }
 
 const AnimeContext = createContext<AnimeContextType | undefined>(undefined);
 
 export const AnimeProvider = ({ children }: { children: ReactNode }) => {
-  const [topAnime, setTopAnime] = useState<Anime[]>([]);
+  const [allAnime, setAllAnime] = useState<Anime[]>([]);
   const [animeById, setAnimeById] = useState<Record<number, AnimeDetail>>({});
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const fetchedPagesRef = useRef<Set<number>>(new Set());
+  const [genreOptions, setGenreOptions] = useState<RawGenre[]>([]);
+
+  useEffect(() => {
+    fetchAllGenres().then(setGenreOptions);
+  }, []);
 
   const fetchNextPage = async () => {
     if (loading || fetchedPagesRef.current.has(page)) return;
@@ -28,52 +32,41 @@ export const AnimeProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
 
     try {
-      const data = await fetchTopAnime(page);
+      const data = await fetchAllAnime(page);
 
-      setTopAnime((prev) => {
+      // filter duplicates
+      setAllAnime((prev) => {
         const seen = new Set(prev.map((a) => a.id));
         const uniqueNew = data.filter((a) => !seen.has(a.id));
         return [...prev, ...uniqueNew];
       });
 
-      // setAnimeById((prev) => {
-      //   const copy = { ...prev };
-      //   data.forEach((anime) => {
-      //     copy[anime.id] = anime;
-      //   });
-      //   return copy;
-      // });
-
       setPage((p) => p + 1);
     } catch (err) {
-      console.error("Failed to fetch top anime:", err);
+      console.error("Failed to fetch anime:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  // const fetchAnimeById = async (id: number) => {
-  //   if (animeById[id]) return;
-  //   try {
-  //     const anime = await fetchAnimeByIdApi(id);
-  //     setAnimeById((prev) => ({ ...prev, [id]: anime }));
-  //   } catch (err) {
-  //     console.error(`Failed to fetch anime ${id}:`, err);
-  //   }
-  // };
-
+  const fetchAnimeById = async (id: number) => {
+    if (animeById[id]) return;
+    try {
+      const anime = await fetchAnimeByIdApi(id);
+      if (anime) {
+        setAnimeById((prev) => ({ ...prev, [id]: anime }));
+      }
+    } catch (err) {
+      console.error(`Failed to fetch anime ${id}:`, err);
+    }
+  };
 
   useEffect(() => {
     fetchNextPage();
   }, []);
 
   return (
-    <AnimeContext.Provider 
-        value={{ topAnime, 
-                //  animeById, 
-                 fetchNextPage, 
-                //  fetchAnimeById, 
-                 loading }}>
+    <AnimeContext.Provider value={{ allAnime, animeById, fetchNextPage, fetchAnimeById, loading, genreOptions }}>
       {children}
     </AnimeContext.Provider>
   );
