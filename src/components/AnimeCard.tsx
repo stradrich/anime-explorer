@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import type { Anime } from "../types/anime";
+import type { Anime } from "../api/jikan";
 
 interface Props {
   anime: Anime;
