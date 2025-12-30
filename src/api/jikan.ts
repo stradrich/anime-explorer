@@ -1,7 +1,9 @@
-// GET /v4/top/anime                        → fetchAllAnime
-// GET /v4/top/anime?page=:page             → AnimeMainList infinite scrolling
-// GET /v4/anime/{id}/full                  → AnimeDetailedPage
-// GET /v4/anime?genres=:genreId&page=:page → Filtering (not implemented)
+// GET /v4/anime                                                          → fetchAllAnime
+// GET /v4/top/anime                                                      → fetchAllTopAnime
+// GET /v4/top/anime?page=:page                                           → AnimeMainList infinite scrolling
+// GET /v4/anime/{id}/full                                                → AnimeDetailedPage
+// GET /v4/anime?genres=:genreId&page=:page                               → fetchAnimeById
+// GET /v4/anime?genres=${id}&order_by=popularity&sort=desc&page=${page}. → fetchAnimeByQuery
 
 import type { Anime, AnimeDetail } from "./dataTypes";
 
@@ -121,6 +123,27 @@ export async function fetchAnimeByCategory(
     explicit_genres: anime.explicit_genres?.map((g: any) => g.name) || [],
     themes: anime.themes?.map((g: any) => g.name) || [],
     demographics: anime.demographics?.map((g: any) => g.name) || [],
+  }));
+}
+
+/**
+ * Fetch top anime (all pages)
+ */
+export async function fetchAllTopAnime(page: number = 1): Promise<Anime[]> {
+  const data = await safeFetch(`https://api.jikan.moe/v4/top/anime?page=${page}`);
+  if (!data) return [];
+
+  return data.map((anime: any) => ({
+    id: anime.mal_id,
+    title: anime.title || "",
+    imageUrl: anime.images?.jpg?.image_url || "",
+    synopsis: anime.synopsis || "",
+    episodes: anime.episodes ?? 0,
+    score: anime.score ?? 0,
+    type: anime.type || "",
+    rating: anime.rating || "",
+    year: anime.year ?? null,
+    genres: anime.genres?.map((g: any) => g.name) || [],
   }));
 }
 
