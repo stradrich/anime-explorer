@@ -1,323 +1,167 @@
-// src/components/AnimeMainList.tsx
 import LoadingSkeleton from "../components/ui/loading-skeleton";
 import AnimeCard from "./AnimeCard";
 import type { Anime } from "../api/dataTypes";
-// import { mockAnimeArr } from "../types/mockData/anime"; // keep for reference
+// // import { mockAnimeArr } from "../types/mockData/anime"; // keep for reference
 import { useAnime } from "../context/AnimeContext";
 import { useEffect, useRef, useState } from "react";
 import { fetchAnimeByCategory } from "../api/jikan";
 
-
 const ANIME_DISPLAY_COUNT = 8;
 const MAX_SEARCH_PAGE = 3;
 
+type Mode = "default" | "genre" | "search";
+
 export default function AnimeMainList() {
-  const { allAnime, fetchNextPage, loading: contextLoading, genreOptions, fetchAnimeByQuery} = useAnime();
+  const { allAnime, fetchNextPage, loading: contextLoading, genreOptions, fetchAnimeByQuery } = useAnime();
+
+  const [mode, setMode] = useState<Mode>("default");
+
+  // visible UI count
   const [visibleCount, setVisibleCount] = useState(ANIME_DISPLAY_COUNT);
+
+  // infinite scroll
   const [infiniteScrollEnabled, setInfiniteScrollEnabled] = useState(false);
   const loaderRef = useRef<HTMLDivElement | null>(null);
+
+  // --- Genre ---
   const [selectedGenre, setSelectedGenre] = useState<number | null>(null);
-  const [animeList, setAnimeList] = useState<Anime[]>([]); // fetch genre based on selectedGenre during filtering 
+  const [animeList, setAnimeList] = useState<Anime[]>([]);
   const [genrePage, setGenrePage] = useState(1);
   const [genreLoading, setGenreLoading] = useState(false);
+
+  // --- Search ---
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
-  const [searchPage, setSearchPage] = useState(1);
-  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchResults, setSearchResults] = useState<Anime[]>([]);
+  const searchPageRef = useRef(1);
+  const searchLoadingRef = useRef(false);
 
-  // console.log(genreOptions);
-  // console.log(selectedGenre);
-  // console.log(animeList);
-  
-  // console.log(searchQuery);
-  // console.log(searchPage);
-  // console.log(searchLoading);
-  
-  // const isGenreMode = selectedGenre !== null;
-  const isSearchMode = debouncedQuery.length > 0;
-  const isGenreMode = !isSearchMode && selectedGenre !== null;
-
-
+  // --- Determine mode ---
   useEffect(() => {
-  if (!debouncedQuery) {
-    setSearchResults([]);
-    setSearchPage(1);
-    return;
-  }
+    if (debouncedQuery) setMode("search");
+    else if (selectedGenre) setMode("genre");
+    else setMode("default");
+  }, [debouncedQuery, selectedGenre]);
 
-  let cancelled = false;
-  setSearchLoading(true);
+  // --- Reset visibleCount on mode change ---
+  useEffect(() => {
+    setVisibleCount(ANIME_DISPLAY_COUNT);
+  }, [mode]);
 
-  fetchAnimeByQuery(debouncedQuery, 1).then((data) => {
-    if (!cancelled) {
-      setSearchResults(data);
-      // setSearchPage(2); // next page
-       searchPageRef.current = 2; 
-      setVisibleCount(ANIME_DISPLAY_COUNT);
-    }
-  }).finally(() => setSearchLoading(false));
-
-  return () => { cancelled = true };
-}, [debouncedQuery]);
-
-
-  // debounce the search input
+  // --- Search debounce ---
   useEffect(() => {
     const handler = setTimeout(() => setDebouncedQuery(searchQuery), 250);
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  // fetch results when debouncedQuery changes
-  const [searchResults, setSearchResults] = useState<Anime[]>([]);
-  // useEffect(() => {
-  //   if (!debouncedQuery) {
-  //     setSearchResults([]);
-  //     return;
-  //   }
-
-  //   fetchAnimeByQuery(debouncedQuery).then(setSearchResults);
-  // }, [debouncedQuery]);
-
-  // useEffect(() => {
-  //   const timeout = setTimeout(() => {
-  //     if (selectedGenre) {
-  //       fetchAnimeByCategory("genres", selectedGenre, 1).then(setAnimeList);
-  //     }
-  //   }, 500); // wait 500ms after user stops changing
-
-  //   return () => clearTimeout(timeout);
-  // }, [selectedGenre]);
-
-  // console.log(animeList);
-  // console.log(genreOptions);
-  // console.log(selectedGenre);
-  
-  // const visibleAnimes = mockAnimeArr.slice(0, visibleCount); // old mock
-  // const visibleAnimes = allAnime.slice(0, visibleCount);
-  // const sourceAnimes = selectedGenre ? animeList : allAnime;
-  // const sourceAnimes = selectedGenre
-  //                       ? Array.from(new Map(animeList.map(a => [a.id, a])).values())
-  //                       : allAnime;
-  const sourceAnimes = isSearchMode
-                        ? searchResults
-                        : isGenreMode
-                          ? Array.from(new Map(animeList.map(a => [a.id, a])).values())
-                          : allAnime;
-  const visibleAnimes = sourceAnimes.slice(0, visibleCount);
-
-  // useEffect(() => {
-  //   if (!selectedGenre) {
-  //     setAnimeList([]);
-  //     setGenrePage(1);
-  //     setVisibleCount(ANIME_DISPLAY_COUNT);
-  //     return;
-  //   }
-
-  //   setGenrePage(1);
-  //   setAnimeList([]);
-  //   setVisibleCount(ANIME_DISPLAY_COUNT);
-  // }, [selectedGenre]);
-
-  // useEffect(() => {
-  // if (!selectedGenre) return;
-
-  // let cancelled = false;
-  // setGenreLoading(true);
-
-  // fetchAnimeByCategory("genres", selectedGenre, genrePage)
-  //     .then((data) => {
-  //       if (!cancelled) {
-  //         setAnimeList((prev) =>
-  //           genrePage === 1 ? data : [...prev, ...data]
-  //         );
-  //       }
-  //     })
-  //     .finally(() => setGenreLoading(false));
-
-  //   return () => {
-  //     cancelled = true;
-  //   };
-  // }, [selectedGenre, genrePage]);
-
+  // --- Fetch search results ---
   useEffect(() => {
-    // reset search input & results when genre changes
-    setSearchQuery("");
-    setDebouncedQuery("");
-    setSearchResults([]);
-    setVisibleCount(ANIME_DISPLAY_COUNT);
-
-    if (!selectedGenre) {
-      setAnimeList([]);
-      setGenrePage(1);
+    if (!debouncedQuery) {
+      setSearchResults([]);
+      searchPageRef.current = 1;
       return;
     }
 
-    setGenreLoading(true);
     let cancelled = false;
+    searchLoadingRef.current = true;
+    fetchAnimeByQuery(debouncedQuery, 1)
+      .then((data) => {
+        if (!cancelled) setSearchResults(data);
+        searchPageRef.current = 2;
+      })
+      .finally(() => (searchLoadingRef.current = false));
 
-    fetchAnimeByCategory("genres", selectedGenre, 1)
+    return () => { cancelled = true };
+  }, [debouncedQuery]);
+
+  const fetchNextSearchPage = async () => {
+    if (searchLoadingRef.current) return;
+    if (searchPageRef.current > MAX_SEARCH_PAGE) return;
+
+    searchLoadingRef.current = true;
+    try {
+      const data = await fetchAnimeByQuery(debouncedQuery, searchPageRef.current);
+      setSearchResults((prev) => [...prev, ...data]);
+      searchPageRef.current += 1;
+    } catch (err) {
+      console.error("Search fetch error:", err);
+    } finally {
+      searchLoadingRef.current = false;
+    }
+  };
+
+  // --- Fetch genre page ---
+  useEffect(() => {
+    if (!selectedGenre) return;
+
+    let cancelled = false;
+    setGenreLoading(true);
+
+    fetchAnimeByCategory("genres", selectedGenre, genrePage)
       .then((data) => {
         if (!cancelled) {
-          setAnimeList(data);
-          setGenrePage(1);
+          setAnimeList((prev) => (genrePage === 1 ? data : [...prev, ...data]));
         }
       })
       .finally(() => setGenreLoading(false));
 
     return () => { cancelled = true };
-  }, [selectedGenre]);
+  }, [selectedGenre, genrePage]);
 
-  // const loadMore = () => {
-  //   setVisibleCount((prev) => prev + ANIME_DISPLAY_COUNT);
-  //   setInfiniteScrollEnabled(true);
-  //   // Fetch next page if we reach end of current array
-  //   if (visibleCount + ANIME_DISPLAY_COUNT >= allAnime.length) {
-  //     fetchNextPage();
-  //   }
-  // };
-
+  // --- Load more button ---
   const loadMore = () => {
-  setVisibleCount((prev) => prev + ANIME_DISPLAY_COUNT);
-  setInfiniteScrollEnabled(true);
-};
+    setVisibleCount((prev) => prev + ANIME_DISPLAY_COUNT);
+    setInfiniteScrollEnabled(true);
 
+    if (mode === "default") fetchNextPage();
+    else if (mode === "genre") setGenrePage((p) => p + 1);
+    else if (mode === "search") fetchNextSearchPage();
+  };
 
-  // Infinite Scroll
-  // useEffect(() => {
-  //   if (!infiniteScrollEnabled || selectedGenre) return;
-
-  //   const observer = new IntersectionObserver(
-  //     (entries) => {
-  //       if (entries[0].isIntersecting && !contextLoading) {
-  //         setVisibleCount((prev) => prev + ANIME_DISPLAY_COUNT);
-  //         fetchNextPage();
-  //       }
-  //     },
-  //     { rootMargin: "200px" }
-  //   );
-
-  //   if (loaderRef.current) observer.observe(loaderRef.current);
-  //   return () => observer.disconnect();
-  // }, [infiniteScrollEnabled, contextLoading, fetchNextPage]);
-
-  // if (contextLoading && allAnime.length === 0) {
-  //   return <LoadingSkeleton count={ANIME_DISPLAY_COUNT} />;
-  // }
-
-  const searchPageRef = useRef(1);
-  const searchLoadingRef = useRef(false); // lock while fetching
-
-  // useEffect(() => {
-  //   if (!infiniteScrollEnabled || !loaderRef.current) return;
-
-  //   const observer = new IntersectionObserver(async (entries) => {
-  //     if (!entries[0].isIntersecting) return;
-
-  //     setVisibleCount((prev) => prev + ANIME_DISPLAY_COUNT);
-
-  //     if (searchLoadingRef.current || genreLoading || contextLoading) return;
-
-  //     if (isSearchMode && debouncedQuery) {
-  //       if (searchPageRef.current > MAX_SEARCH_PAGE) return;
-
-  //       searchLoadingRef.current = true;
-
-  //       const data = await fetchAnimeByQuery(debouncedQuery, searchPageRef.current);
-  //       console.log(`Search page ${searchPageRef.current} results:`, data);
-  //       setSearchResults((prev) => [...prev, ...data]);
-  //       searchPageRef.current += 1;
-
-  //       searchLoadingRef.current = false;
-  //     } else if (isGenreMode && selectedGenre) {
-  //       setGenrePage((p) => p + 1);
-  //     } else if (!isSearchMode && !isGenreMode) {
-  //       fetchNextPage();
-  //     }
-  //   }, { rootMargin: "200px" });
-
-  //   observer.observe(loaderRef.current);
-  //   return () => observer.disconnect();
-  // }, [
-  //   infiniteScrollEnabled,
-  //   isSearchMode,
-  //   isGenreMode,
-  //   debouncedQuery,
-  //   selectedGenre,
-  //   genreLoading,
-  //   contextLoading,
-  //   fetchNextPage
-  // ]);
-
-  const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
-
-const fetchNextSearchPage = async () => {
-  if (!debouncedQuery || searchLoadingRef.current) return;
-  if (searchPageRef.current > MAX_SEARCH_PAGE) return;
-
-  searchLoadingRef.current = true;
-  try {
-    const data = await fetchAnimeByQuery(debouncedQuery, searchPageRef.current);
-    // console.log("Raw API results:", data);
-    setSearchResults(prev => [...prev, ...data]);
-    searchPageRef.current += 1;
-  } catch (err) {
-    console.error("Search fetch error:", err);
-  } finally {
-    await delay(500); // throttle
-    searchLoadingRef.current = false;
-  }
-};
-
-// Debounce search input
-useEffect(() => {
-  const handler = setTimeout(() => setDebouncedQuery(searchQuery), 250);
-  return () => clearTimeout(handler);
-}, [searchQuery]);
-
-// Reset search page + results when query changes
-useEffect(() => {
-  searchPageRef.current = 1;
-  setSearchResults([]);
-}, [debouncedQuery]);
-
-// IntersectionObserver for infinite scroll
-useEffect(() => {
-  if (!infiniteScrollEnabled || !loaderRef.current) return;
-
-  const observer = new IntersectionObserver((entries) => {
-    if (!entries[0].isIntersecting) return;
-
-    setVisibleCount(prev => prev + ANIME_DISPLAY_COUNT);
-
-    if (isSearchMode) fetchNextSearchPage();
-    else if (isGenreMode) setGenrePage(p => p + 1);
-    else fetchNextPage();
-  }, { rootMargin: "200px" });
-
-  observer.observe(loaderRef.current);
-  return () => observer.disconnect();
-}, [infiniteScrollEnabled, isSearchMode, isGenreMode, debouncedQuery, selectedGenre]);
-
+  // --- Infinite scroll ---
   useEffect(() => {
-    setVisibleCount(ANIME_DISPLAY_COUNT);
-    if (isSearchMode) setSearchPage(1);
-    if (isGenreMode) setGenrePage(1);
-  }, [debouncedQuery, selectedGenre]);
+    if (!infiniteScrollEnabled || !loaderRef.current) return;
 
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries[0].isIntersecting) return;
+
+      setVisibleCount((prev) => prev + ANIME_DISPLAY_COUNT);
+
+      if (mode === "default") fetchNextPage();
+      else if (mode === "genre") setGenrePage((p) => p + 1);
+      else if (mode === "search") fetchNextSearchPage();
+    }, { rootMargin: "200px" });
+
+    observer.observe(loaderRef.current);
+    return () => observer.disconnect();
+  }, [infiniteScrollEnabled, mode, genreLoading, contextLoading]);
+
+  // --- Determine what to show ---
+  const sourceAnimes =
+    mode === "search" ? searchResults :
+    mode === "genre" ? Array.from(new Map(animeList.map(a => [a.id, a])).values()) :
+    allAnime;
+
+  const visibleAnimes = sourceAnimes.slice(0, visibleCount);
+
+  // --- Clear search when switching to genre ---
   useEffect(() => {
-    if (!selectedGenre) {
-      setAnimeList([]);
+    if (selectedGenre !== null) {
+      // Clear search state
+      setSearchQuery("");
+      setDebouncedQuery("");
+      setSearchResults([]);
+      searchPageRef.current = 1;
+
+      // Reset visible count and genre page
+      setVisibleCount(ANIME_DISPLAY_COUNT);
       setGenrePage(1);
+      setAnimeList([]);
+
+      // prevent infinite scroll from firing immediately
+      setInfiniteScrollEnabled(false);
     }
   }, [selectedGenre]);
-
-//   useEffect(() => {
-//   if (isSearchMode) {
-//     searchPageRef.current = 1;
-//     setSearchPage(1);
-//     setSearchResults([]); 
-//   }
-// }, [debouncedQuery]);
 
   return (
     <section className="container">
@@ -325,10 +169,6 @@ useEffect(() => {
         <h1 style={{ fontSize: "2rem", fontWeight: 600 }}>Discover Anime</h1>
         <p style={{ color: "#6b7280" }}>Browse popular anime and your personal favorites</p>
       </header>
-
-      {/* <div style={{ marginBottom: "1.5rem" }}>
-        <label style={{ fontWeight: 500 }}>Filter by Genre</label>
-      </div> */}
 
       <div style={{ marginBottom: "1.5rem" }}>
         <label style={{ fontWeight: 500 }}>Filter by Genre</label>
@@ -357,18 +197,11 @@ useEffect(() => {
         />
       </div>
 
-
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "1rem" }}>
-        {/* {visibleAnimes.map((anime: Anime) => (
-          <AnimeCard key={anime.id} anime={anime} />
-        ))} */}
         {visibleAnimes.map((anime: Anime, idx: number) => (
           <AnimeCard key={`${anime.id}-${idx}`} anime={anime} />
         ))}
-
-        {/* {contextLoading && <LoadingSkeleton count={ANIME_DISPLAY_COUNT} />} */}
-        {/* {(contextLoading || genreLoading) && <LoadingSkeleton count={ANIME_DISPLAY_COUNT} />} */}
-        {(searchLoading || genreLoading || contextLoading) && <LoadingSkeleton count={ANIME_DISPLAY_COUNT} />}
+        {(contextLoading || genreLoading || searchLoadingRef.current) && <LoadingSkeleton count={ANIME_DISPLAY_COUNT} />}
       </div>
 
       {!infiniteScrollEnabled && (
@@ -383,5 +216,4 @@ useEffect(() => {
     </section>
   );
 }
-
 
