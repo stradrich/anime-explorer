@@ -50,40 +50,10 @@ export default function FavoritePage() {
   }, [favourites, animeById, fetchAnimeById]);
 
   return (
-    // <section className="container">
-    //   <h1>My Favorites</h1>
-    //   <button onClick={clearFavourites} disabled={favourites.length === 0}>
-    //     Clear All Favourites
-    //   </button>
-
-    //   {favourites.length === 0 ? (
-    //     <div>
-    //       <h2>No favourites yet</h2>
-    //       <Link to="/">
-    //         <p>Browse anime and build your collection ❤️</p>
-    //       </Link>
-    //     </div>
-    //   ) : loading ? (
-    //     <LoadingSkeleton count={Math.max(favourites.length, 8)} />
-    //   ) : (
-    //     <div>
-    //       {favouriteAnimes.map((anime) => (
-    //         <AnimeCard key={anime.id} anime={anime} />
-    //       ))}
-    //     </div>
-    //   )}
-    // </section>
      <section className="max-w-6xl mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h1 className="text-3xl font-bold text-gray-900">My Favorites</h1>
-        {/* <button
-          onClick={clearFavourites}
-          disabled={favourites.length === 0}
-          className="px-4 py-2 rounded-lg bg-gray-100 text-red-600 font-semibold hover:bg-red-200 disabled:opacity-50 transition"
-        >
-          Clear All
-          </button> */}
           <Button
             variant="text"
             color="error"
@@ -93,8 +63,6 @@ export default function FavoritePage() {
             Clear All
         </Button>
       </div>
-
-
 
       {/* Empty state */}
       {favourites.length === 0 ? (

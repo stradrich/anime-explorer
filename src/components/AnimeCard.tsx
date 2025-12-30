@@ -7,39 +7,6 @@ interface Props {
 
 export default function AnimeCard({ anime }: Props) {
   return (
-    // <Link to={`/anime/${anime.id}`}>
-    //   <div>
-    //     {/* Image */}
-    //     <div>
-    //       <img
-    //         src={anime.imageUrl}
-    //         alt={anime.title}
-    //         />
-    //     </div>
-
-    //     {/* Content */}
-    //     <div>
-    //       <h3>
-    //         {anime.title}
-    //       </h3>
-    //       <div>
-    //         <span>{anime.score?.toFixed(1) ?? "N/A"}</span>
-    //         <span>{anime.year ?? "Unknown"}</span>
-    //       </div>
-    //     </div>
-
-    //     {/* Genre */}
-    //     <div>
-    //       {anime.genres?.slice(0, 2).map((genre, index) => (
-    //         <span
-    //           key={`${genre}-${index}`}
-    //         >
-    //           {genre}
-    //         </span>
-    //       )) ?? null}
-    //     </div>
-    //   </div>
-    // </Link>
       <Link to={`/anime/${anime.id}`} className="group">
       <div className="flex flex-col bg-white rounded-xl shadow-md overflow-hidden h-full transition-transform transform hover:scale-105 hover:shadow-xl">
         {/* Image */}

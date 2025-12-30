@@ -40,44 +40,9 @@ export default function AnimeDetailedPage() {
   const isFavourite = favourites.includes(anime.id);
 
   return (
-    // <div className="container">
-    //   <button onClick={() => navigate(-1)}>Back</button>
-
-    //   <button
-    //     onClick={() => toggleFavourite(anime.id)}
-    //     aria-label={isFavourite ? "Remove from favourites" : "Add to favourites"}
-    //   >
-    //     {isFavourite ? <AiFillHeart /> : <AiOutlineHeart />}
-    //   </button>
-
-    //   <div>
-    //     <img
-    //       src={anime.imageUrl}
-    //       alt={anime.title}
-    //     />
-    //     <h1>{anime.title}</h1>
-    //     <p>⭐ {anime.score?.toFixed(1) ?? "N/A"}</p>
-    //     <p>Year: {anime.year ?? "Unknown"}</p>
-    //     <p>Genres: {anime.genres?.join(", ") ?? "N/A"}</p>
-    //     <p>{anime.synopsis ?? ""}</p>
-    //     <p>{anime.background ?? ""}</p>
-    //     <p>Episodes: {anime.episodes ?? "Unknown"}</p>
-    //     <p>Duration: {anime.duration ?? "Unknown"}</p>
-    //     <p>Rating: {anime.rating ?? "N/A"}</p>
-    //     <p>Studios: {anime.studios?.join(", ") ?? "N/A"}</p>
-    //     <p>Producers: {anime.producers?.join(", ") ?? "N/A"}</p>
-    //   </div>
-    // </div>
     <div className="max-w-5xl mx-auto p-6 space-y-6">
       {/* Header Buttons */}
       <div className="flex justify-between items-center">
-        {/* <button
-          onClick={() => navigate(-1)}
-          className="px-4 py-2 rounded-lg bg-gray-100 text-black hover:bg-gray-300 transition"
-        >
-          Back
-        </button> */}
-
         <Button
           variant="outlined"
           onClick={() => navigate(-1)}

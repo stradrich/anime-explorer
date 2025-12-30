@@ -164,61 +164,6 @@ export default function AnimeMainList() {
   }, [selectedGenre]);
 
   return (
-    // <section>
-    //   <header>
-    //     <h1>Discover Anime</h1>
-    //     <p>Browse popular anime and your personal favorites</p>
-    //   </header>
-
-    //   <div>
-    //     <label>Filter by Genre</label>
-    //     <select
-    //       value={selectedGenre ?? ""}
-    //         onChange={(e) =>
-    //           setSelectedGenre(
-    //             e.target.value === "top" ? "top" :
-    //             e.target.value === "" ? null :
-    //             Number(e.target.value)
-    //           )
-    //         }
-    //     >
-    //       <option value="top">Top Anime</option>
-    //       <option value="">All</option>
-    //       {genreOptions.map((genre) => (
-    //         <option key={genre.mal_id} value={genre.mal_id}>
-    //           {genre.name}
-    //         </option>
-    //       ))}
-    //     </select>
-    //   </div>
-
-    //   <div>
-    //     <label>Search Anime</label>
-    //     <input
-    //       type="text"
-    //       value={searchQuery}
-    //       onChange={(e) => setSearchQuery(e.target.value)}
-    //       placeholder="Type anime name..."
-    //     />
-    //   </div>
-
-    //   <div>
-    //     {visibleAnimes.map((anime: Anime, idx: number) => (
-    //       <AnimeCard key={`${anime.id}-${idx}`} anime={anime} />
-    //     ))}
-    //     {(contextLoading || genreLoading || searchLoadingRef.current || loadingTop) && <LoadingSkeleton count={ANIME_DISPLAY_COUNT} />}
-    //   </div>
-
-    //   {!infiniteScrollEnabled && (
-    //     <div>
-    //       <button onClick={loadMore}>
-    //         Load more
-    //       </button>
-    //     </div>
-    //   )}
-
-    //   {infiniteScrollEnabled && <div ref={loaderRef}/>}
-    // </section>
     <section className="space-y-6">
   <header className="space-y-2">
     <h1 className="text-3xl font-bold text-gray-900">Discover Anime</h1>
@@ -276,17 +221,6 @@ export default function AnimeMainList() {
   {/* Load More Button */}
   {!infiniteScrollEnabled && (
     <div className="flex justify-center mt-6">
-      {/* <button
-        onClick={loadMore}
-        className="
-          px-6 py-2 rounded-lg bg-gray-100 text-gray-500 font-semibold
-          hover:text-gray-800 transition
-          focus:outline-none focus:ring-2 focus:ring-black
-          focus:ring-offset-0
-        "
-      >
-        Load more
-      </button> */}
       <Button
         variant="outlined"
         color="primary"
