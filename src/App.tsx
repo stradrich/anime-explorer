@@ -4,7 +4,7 @@ import AnimeMainList from './components/AnimeMainList';
 import AnimeDetailedPage from './components/AnimeDetailedPage';
 import FavoritePage from './components/FavouritePage';
 import { FavouritesProvider } from "./context/FavouritesContext";
-import { AnimeProvider } from "./context/AnimeContext"; // <- add this
+import { AnimeProvider } from "./context/AnimeContext";
 
 export default function App() {
   return (
@@ -23,4 +23,5 @@ export default function App() {
     </FavouritesProvider>
   )
 };
+
 

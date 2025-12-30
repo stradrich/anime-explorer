@@ -7,73 +7,41 @@ interface Props {
 
 export default function AnimeCard({ anime }: Props) {
   return (
-    <Link to={`/anime/${anime.id}`}>
-      <div
-        style={{
-          borderRadius: "0.75rem",
-          overflow: "hidden",
-          border: "1px solid #e5e7eb",
-          transition: "transform 0.2s ease",
-        }}
-      >
+      <Link to={`/anime/${anime.id}`} className="group">
+      <div className="flex flex-col bg-white rounded-xl shadow-md overflow-hidden h-full transition-transform transform hover:scale-105 hover:shadow-xl">
         {/* Image */}
-        <div style={{ aspectRatio: "1 / 1", overflow: "hidden" }}>
+        <div className="w-full h-48 overflow-hidden rounded-t-xl">
           <img
             src={anime.imageUrl}
             alt={anime.title}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            className="w-full h-full object-cover"
           />
         </div>
 
         {/* Content */}
-        <div style={{ padding: "0.75rem" }}>
-          <h3
-            className="line-clamp-2"
-            style={{
-              fontSize: "0.95rem",
-              fontWeight: 600,
-              minHeight: "2.6em",
-            }}
-          >
+        <div className="p-4 flex-1 flex flex-col justify-between">
+          <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
             {anime.title}
           </h3>
-          <div
-            style={{
-              marginTop: "0.5rem",
-              fontSize: "0.8rem",
-              color: "#6b7280",
-              display: "flex",
-              justifyContent: "space-between",
-            }}
-          >
-            <span>{anime.score?.toFixed(1) ?? "N/A"}</span>
+
+          <div className="mt-2 flex justify-between items-center text-sm text-gray-600">
+            <span>⭐ {anime.score?.toFixed(1) ?? "N/A"}</span>
             <span>{anime.year ?? "Unknown"}</span>
           </div>
-        </div>
 
-        {/* Genre */}
-        <div
-          style={{
-            marginTop: "0.5rem",
-            display: "flex",
-            gap: "0.25rem",
-            flexWrap: "wrap",
-            padding: "0.75rem",
-          }}
-        >
-          {anime.genres?.slice(0, 2).map((genre, index) => (
-            <span
-              key={`${genre}-${index}`}
-              style={{
-                fontSize: "0.7rem",
-                backgroundColor: "#f3f4f6",
-                padding: "0.15rem 0.4rem",
-                borderRadius: "0.25rem",
-              }}
-            >
-              {genre}
-            </span>
-          )) ?? null}
+          {/* Genres */}
+          {anime.genres && anime.genres.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {anime.genres.slice(0, 2).map((genre, index) => (
+                <span
+                  key={`${genre}-${index}`}
+                  className="px-2 py-1 text-xs font-medium bg-gray-200 text-gray-800 rounded-full"
+                >
+                  {genre}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </Link>

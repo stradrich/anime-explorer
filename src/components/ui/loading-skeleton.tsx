@@ -1,6 +1,6 @@
-type LoadingSkeletonProps = {
+interface LoadingSkeletonProps {
   count?: number;
-};
+}
 
 export default function LoadingSkeleton({ count = 1 }: LoadingSkeletonProps) {
   return (
@@ -8,14 +8,17 @@ export default function LoadingSkeleton({ count = 1 }: LoadingSkeletonProps) {
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
-          style={{
-            height: "280px",
-            backgroundColor: "#e5e7eb",
-            borderRadius: "0.75rem",
-            animation: "pulse 1.5s infinite",
-          }}
-        />
+          className="flex flex-col bg-gray-200 rounded-xl overflow-hidden animate-pulse"
+        >
+          <div className="w-full h-64 md:h-72 lg:h-80 bg-gray-300" />
+          <div className="p-4 space-y-3">
+            <div className="h-6 w-3/4 bg-gray-300 rounded" />
+            <div className="h-4 w-1/2 bg-gray-300 rounded" />
+          </div>
+        </div>
       ))}
     </>
-  )
+  );
 }
+
+
