@@ -9,13 +9,16 @@ import { fetchAnimeByCategory } from "../api/jikan";
 const ANIME_DISPLAY_COUNT = 8;
 const MAX_SEARCH_PAGE = 3;
 
-type Mode = "default" | "genre" | "search";
+type Mode = "default" | "genre" | "search" | "top";
 
 export default function AnimeMainList() {
-  const { allAnime, fetchNextPage, loading: contextLoading, genreOptions, fetchAnimeByQuery } = useAnime();
+  const { allAnime, fetchNextPage, loading: contextLoading, genreOptions, fetchAnimeByQuery, topAnime, fetchNextTopPage, loadingTop} = useAnime();
 
+  // console.log(genreOptions);
+  
   const [mode, setMode] = useState<Mode>("default");
-
+  // console.log(mode);
+  
   // visible UI count
   const [visibleCount, setVisibleCount] = useState(ANIME_DISPLAY_COUNT);
 
@@ -24,7 +27,9 @@ export default function AnimeMainList() {
   const loaderRef = useRef<HTMLDivElement | null>(null);
 
   // --- Genre ---
-  const [selectedGenre, setSelectedGenre] = useState<number | null>(null);
+  // const [selectedGenre, setSelectedGenre] = useState<number | null>(null);
+  // const [selectedGenre, setSelectedGenre] = useState<number | "top" | null>(null);
+  const [selectedGenre, setSelectedGenre] = useState<number | "top" | null>("top");
   const [animeList, setAnimeList] = useState<Anime[]>([]);
   const [genrePage, setGenrePage] = useState(1);
   const [genreLoading, setGenreLoading] = useState(false);
@@ -39,6 +44,7 @@ export default function AnimeMainList() {
   // --- Determine mode ---
   useEffect(() => {
     if (debouncedQuery) setMode("search");
+    else if (selectedGenre === "top") setMode("top");
     else if (selectedGenre) setMode("genre");
     else setMode("default");
   }, [debouncedQuery, selectedGenre]);
@@ -92,7 +98,8 @@ export default function AnimeMainList() {
 
   // --- Fetch genre page ---
   useEffect(() => {
-    if (!selectedGenre) return;
+    // if (!selectedGenre) return;
+    if (typeof selectedGenre !== "number") return;
 
     let cancelled = false;
     setGenreLoading(true);
@@ -114,6 +121,7 @@ export default function AnimeMainList() {
     setInfiniteScrollEnabled(true);
 
     if (mode === "default") fetchNextPage();
+    else if (mode === "top") fetchNextTopPage();
     else if (mode === "genre") setGenrePage((p) => p + 1);
     else if (mode === "search") fetchNextSearchPage();
   };
@@ -128,19 +136,26 @@ export default function AnimeMainList() {
       setVisibleCount((prev) => prev + ANIME_DISPLAY_COUNT);
 
       if (mode === "default") fetchNextPage();
+      else if (mode === "top") fetchNextTopPage();
       else if (mode === "genre") setGenrePage((p) => p + 1);
       else if (mode === "search") fetchNextSearchPage();
     }, { rootMargin: "200px" });
 
     observer.observe(loaderRef.current);
     return () => observer.disconnect();
-  }, [infiniteScrollEnabled, mode, genreLoading, contextLoading]);
+  }, [infiniteScrollEnabled, mode, genreLoading, contextLoading, loadingTop]);
 
   // --- Determine what to show ---
-  const sourceAnimes =
+  // const sourceAnimes =
+  //   mode === "search" ? searchResults :
+  //   mode === "genre" ? Array.from(new Map(animeList.map(a => [a.id, a])).values()) :
+  //   allAnime;
+    const sourceAnimes =
     mode === "search" ? searchResults :
     mode === "genre" ? Array.from(new Map(animeList.map(a => [a.id, a])).values()) :
+    mode === "top" ? topAnime :
     allAnime;
+
 
   const visibleAnimes = sourceAnimes.slice(0, visibleCount);
 
@@ -174,9 +189,17 @@ export default function AnimeMainList() {
         <label style={{ fontWeight: 500 }}>Filter by Genre</label>
         <select
           value={selectedGenre ?? ""}
-          onChange={(e) => setSelectedGenre(Number(e.target.value))}
+          // onChange={(e) => setSelectedGenre(Number(e.target.value))}
+            onChange={(e) =>
+              setSelectedGenre(
+                e.target.value === "top" ? "top" :
+                e.target.value === "" ? null :
+                Number(e.target.value)
+              )
+            }
           style={{ marginLeft: "0.5rem", padding: "0.25rem 0.5rem" }}
         >
+          <option value="top">Top Anime</option>
           <option value="">All</option>
           {genreOptions.map((genre) => (
             <option key={genre.mal_id} value={genre.mal_id}>
@@ -201,7 +224,7 @@ export default function AnimeMainList() {
         {visibleAnimes.map((anime: Anime, idx: number) => (
           <AnimeCard key={`${anime.id}-${idx}`} anime={anime} />
         ))}
-        {(contextLoading || genreLoading || searchLoadingRef.current) && <LoadingSkeleton count={ANIME_DISPLAY_COUNT} />}
+        {(contextLoading || genreLoading || searchLoadingRef.current || loadingTop) && <LoadingSkeleton count={ANIME_DISPLAY_COUNT} />}
       </div>
 
       {!infiniteScrollEnabled && (
