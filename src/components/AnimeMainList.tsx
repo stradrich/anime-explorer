@@ -5,6 +5,7 @@ import type { Anime } from "../api/dataTypes";
 import { useAnime } from "../context/AnimeContext";
 import { useEffect, useRef, useState } from "react";
 import { fetchAnimeByCategory } from "../api/jikan";
+import Button from "@mui/material/Button";
 
 const ANIME_DISPLAY_COUNT = 8;
 const MAX_SEARCH_PAGE = 3;
@@ -163,63 +164,154 @@ export default function AnimeMainList() {
   }, [selectedGenre]);
 
   return (
-    <section className="container">
-      <header style={{ marginBottom: "1rem" }}>
-        <h1 style={{ fontSize: "2rem", fontWeight: 600 }}>Discover Anime</h1>
-        <p style={{ color: "#6b7280" }}>Browse popular anime and your personal favorites</p>
-      </header>
+    // <section>
+    //   <header>
+    //     <h1>Discover Anime</h1>
+    //     <p>Browse popular anime and your personal favorites</p>
+    //   </header>
 
-      <div style={{ marginBottom: "1.5rem" }}>
-        <label style={{ fontWeight: 500 }}>Filter by Genre</label>
-        <select
-          value={selectedGenre ?? ""}
-            onChange={(e) =>
-              setSelectedGenre(
-                e.target.value === "top" ? "top" :
-                e.target.value === "" ? null :
-                Number(e.target.value)
-              )
-            }
-          style={{ marginLeft: "0.5rem", padding: "0.25rem 0.5rem" }}
-        >
-          <option value="top">Top Anime</option>
-          <option value="">All</option>
-          {genreOptions.map((genre) => (
-            <option key={genre.mal_id} value={genre.mal_id}>
-              {genre.name}
-            </option>
-          ))}
-        </select>
-      </div>
+    //   <div>
+    //     <label>Filter by Genre</label>
+    //     <select
+    //       value={selectedGenre ?? ""}
+    //         onChange={(e) =>
+    //           setSelectedGenre(
+    //             e.target.value === "top" ? "top" :
+    //             e.target.value === "" ? null :
+    //             Number(e.target.value)
+    //           )
+    //         }
+    //     >
+    //       <option value="top">Top Anime</option>
+    //       <option value="">All</option>
+    //       {genreOptions.map((genre) => (
+    //         <option key={genre.mal_id} value={genre.mal_id}>
+    //           {genre.name}
+    //         </option>
+    //       ))}
+    //     </select>
+    //   </div>
 
-      <div style={{ marginBottom: "1.5rem" }}>
-        <label style={{ fontWeight: 500 }}>Search Anime</label>
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Type anime name..."
-          style={{ marginLeft: "0.5rem", padding: "0.25rem 0.5rem", width: "200px" }}
-        />
-      </div>
+    //   <div>
+    //     <label>Search Anime</label>
+    //     <input
+    //       type="text"
+    //       value={searchQuery}
+    //       onChange={(e) => setSearchQuery(e.target.value)}
+    //       placeholder="Type anime name..."
+    //     />
+    //   </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "1rem" }}>
-        {visibleAnimes.map((anime: Anime, idx: number) => (
-          <AnimeCard key={`${anime.id}-${idx}`} anime={anime} />
+    //   <div>
+    //     {visibleAnimes.map((anime: Anime, idx: number) => (
+    //       <AnimeCard key={`${anime.id}-${idx}`} anime={anime} />
+    //     ))}
+    //     {(contextLoading || genreLoading || searchLoadingRef.current || loadingTop) && <LoadingSkeleton count={ANIME_DISPLAY_COUNT} />}
+    //   </div>
+
+    //   {!infiniteScrollEnabled && (
+    //     <div>
+    //       <button onClick={loadMore}>
+    //         Load more
+    //       </button>
+    //     </div>
+    //   )}
+
+    //   {infiniteScrollEnabled && <div ref={loaderRef}/>}
+    // </section>
+    <section className="space-y-6">
+  <header className="space-y-2">
+    <h1 className="text-3xl font-bold text-gray-900">Discover Anime</h1>
+    <p className="text-gray-600">Browse popular anime and your personal favorites</p>
+  </header>
+
+  <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+    {/* Genre Filter */}
+    <div className="flex flex-col">
+      <label className="mb-1 text-gray-700 font-thin">Filter by Genre</label>
+      <select
+        value={selectedGenre ?? ""}
+        onChange={(e) =>
+          setSelectedGenre(
+            e.target.value === "top" ? "top" :
+            e.target.value === "" ? null :
+            Number(e.target.value)
+          )
+        }
+        className="px-3 py-2 font-medium rounded-lg border border-gray-300 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-gray-600 transition"
+      >
+        <option value="top">Top Anime</option>
+        <option value="">All</option>
+        {genreOptions.map((genre) => (
+          <option key={genre.mal_id} value={genre.mal_id}>
+            {genre.name}
+          </option>
         ))}
-        {(contextLoading || genreLoading || searchLoadingRef.current || loadingTop) && <LoadingSkeleton count={ANIME_DISPLAY_COUNT} />}
-      </div>
+      </select>
+    </div>
 
-      {!infiniteScrollEnabled && (
-        <div style={{ marginTop: "2rem", textAlign: "center" }}>
-          <button onClick={loadMore} style={{ padding: "0.75rem 1.5rem", borderRadius: "0.5rem", backgroundColor: "#e5e7eb" }}>
-            Load more
-          </button>
-        </div>
-      )}
+    {/* Search Input */}
+    <div className="flex flex-col flex-1">
+      <label className="mb-1 text-gray-700 font-thin">Search Anime</label>
+      <input
+        type="text"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        placeholder="Type anime name..."
+        className="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-gray-600 transition w-full"
+      />
+    </div>
+  </div>
 
-      {infiniteScrollEnabled && <div ref={loaderRef} style={{ height: "40px", marginTop: "2rem" }} />}
-    </section>
+  {/* Anime Grid */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    {visibleAnimes.map((anime: Anime, idx: number) => (
+      <AnimeCard key={`${anime.id}-${idx}`} anime={anime} />
+    ))}
+    {(contextLoading || genreLoading || searchLoadingRef.current || loadingTop) && (
+      <LoadingSkeleton count={ANIME_DISPLAY_COUNT} />
+    )}
+  </div>
+
+  {/* Load More Button */}
+  {!infiniteScrollEnabled && (
+    <div className="flex justify-center mt-6">
+      {/* <button
+        onClick={loadMore}
+        className="
+          px-6 py-2 rounded-lg bg-gray-100 text-gray-500 font-semibold
+          hover:text-gray-800 transition
+          focus:outline-none focus:ring-2 focus:ring-black
+          focus:ring-offset-0
+        "
+      >
+        Load more
+      </button> */}
+      <Button
+        variant="outlined"
+        color="primary"
+        onClick={loadMore}
+        sx={{
+          color: "black",                 // text color
+          borderColor: "black",           // border color
+          "&:hover": {
+            backgroundColor: "rgba(49, 49, 49, 0.08)", // subtle black hover
+            borderColor: "black",        // keep border black on hover
+          },
+          "&:focus": {
+            outline: "none",             // remove default focus ring
+            boxShadow: "none",           // remove default focus shadow
+          },
+        }}
+      >
+        Load more
+      </Button>
+    </div>
+  )}
+
+  {infiniteScrollEnabled && <div ref={loaderRef} />}
+</section>
+
   );
 }
 
