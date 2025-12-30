@@ -102,7 +102,7 @@ export async function fetchAnimeById(id: number): Promise<AnimeDetail | null> {
 }
 
 export async function fetchAnimeByCategory(
-  category: "genres" | "explicit_genres" | "themes" | "demographics",
+  _category: "genres" | "explicit_genres" | "themes" | "demographics",
   id: number,
   page: number = 1
 ): Promise<Anime[]> {
