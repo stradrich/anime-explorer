@@ -20,4 +20,7 @@ export type Anime = {
   rating: string;
   year: number | null;
   genres: string[];
+  explicit_genres?: string[];
+  themes?: string[];
+  demographics?: string[];
 }

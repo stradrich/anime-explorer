@@ -9,7 +9,11 @@ export const mockAnimeArr: Anime[] = Array.from({ length: 100 }, (_, i): Anime =
     id,
     title: `Test ${id}`,
     imageUrl: IMAGE,
+    synopsis: "Test synopsis",
+    episodes: 12,
     score: Number((7.2 + (id % 6) * 0.3).toFixed(1)),
+    type: "TV",
+    rating: "PG-13",
     year: 2000 + (id % 25),
     genres:
       id % 5 === 0

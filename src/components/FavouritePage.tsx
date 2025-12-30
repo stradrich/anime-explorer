@@ -4,7 +4,7 @@ import AnimeCard from "./AnimeCard";
 import { useFavourites } from "../context/FavouritesContext";
 import { useAnime } from "../context/AnimeContext";
 import { Link } from "react-router-dom";
-import { useMemo, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import type { AnimeDetail } from "../api/dataTypes";
 import { Button } from "@mui/material";
 

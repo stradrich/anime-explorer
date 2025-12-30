@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import type { Anime } from "../api/jikan";
+import type { Anime } from "../api/dataTypes";
 
 interface Props {
   anime: Anime;
@@ -32,7 +32,7 @@ export default function AnimeCard({ anime }: Props) {
           {/* Genres */}
           {anime.genres && anime.genres.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-2">
-              {anime.genres.slice(0, 2).map((genre, index) => (
+              {anime.genres.slice(0, 2).map((genre: string, index: number) => (
                 <span
                   key={`${genre}-${index}`}
                   className="px-2 py-1 text-xs font-medium bg-gray-200 text-gray-800 rounded-full"
