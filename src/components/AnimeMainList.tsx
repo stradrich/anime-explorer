@@ -13,34 +13,23 @@ type Mode = "default" | "genre" | "search" | "top";
 
 export default function AnimeMainList() {
   const { allAnime, fetchNextPage, loading: contextLoading, genreOptions, fetchAnimeByQuery, topAnime, fetchNextTopPage, loadingTop} = useAnime();
-
-  // console.log(genreOptions);
-  
   const [mode, setMode] = useState<Mode>("default");
-  // console.log(mode);
-  
-  // visible UI count
+  // visible anime count
   const [visibleCount, setVisibleCount] = useState(ANIME_DISPLAY_COUNT);
-
   // infinite scroll
   const [infiniteScrollEnabled, setInfiniteScrollEnabled] = useState(false);
   const loaderRef = useRef<HTMLDivElement | null>(null);
-
   // --- Genre ---
-  // const [selectedGenre, setSelectedGenre] = useState<number | null>(null);
-  // const [selectedGenre, setSelectedGenre] = useState<number | "top" | null>(null);
   const [selectedGenre, setSelectedGenre] = useState<number | "top" | null>("top");
   const [animeList, setAnimeList] = useState<Anime[]>([]);
   const [genrePage, setGenrePage] = useState(1);
   const [genreLoading, setGenreLoading] = useState(false);
-
   // --- Search ---
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Anime[]>([]);
   const searchPageRef = useRef(1);
   const searchLoadingRef = useRef(false);
-
   // --- Determine mode ---
   useEffect(() => {
     if (debouncedQuery) setMode("search");
@@ -98,7 +87,6 @@ export default function AnimeMainList() {
 
   // --- Fetch genre page ---
   useEffect(() => {
-    // if (!selectedGenre) return;
     if (typeof selectedGenre !== "number") return;
 
     let cancelled = false;
@@ -146,10 +134,6 @@ export default function AnimeMainList() {
   }, [infiniteScrollEnabled, mode, genreLoading, contextLoading, loadingTop]);
 
   // --- Determine what to show ---
-  // const sourceAnimes =
-  //   mode === "search" ? searchResults :
-  //   mode === "genre" ? Array.from(new Map(animeList.map(a => [a.id, a])).values()) :
-  //   allAnime;
     const sourceAnimes =
     mode === "search" ? searchResults :
     mode === "genre" ? Array.from(new Map(animeList.map(a => [a.id, a])).values()) :
@@ -189,7 +173,6 @@ export default function AnimeMainList() {
         <label style={{ fontWeight: 500 }}>Filter by Genre</label>
         <select
           value={selectedGenre ?? ""}
-          // onChange={(e) => setSelectedGenre(Number(e.target.value))}
             onChange={(e) =>
               setSelectedGenre(
                 e.target.value === "top" ? "top" :
