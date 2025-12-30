@@ -2,11 +2,6 @@
 
 A React-based anime discovery application that consumes the Jikan API (MyAnimeList). Built with TypeScript, Tailwind CSS, and React Router for seamless client-side navigation.
 
-![Anime Explorer](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?style=for-the-badge&logo=typescript)
-![Vite](https://img.shields.io/badge/Vite-7-purple?style=for-the-badge&logo=vite)
-![Tailwind](https://img.shields.io/badge/Tailwind-4-38bdf8?style=for-the-badge&logo=tailwindcss)
-
 https://anime-explorer-67uuytbfz-aldrich-pinsos-projects.vercel.app/
 ---
 
