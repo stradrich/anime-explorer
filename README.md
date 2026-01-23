@@ -2,6 +2,11 @@
 
 A React-based anime discovery application that consumes the Jikan API (MyAnimeList). Built with TypeScript, Tailwind CSS, and React Router for seamless client-side navigation.
 
+![Anime Explorer](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?style=for-the-badge&logo=typescript)
+![Vite](https://img.shields.io/badge/Vite-7-purple?style=for-the-badge&logo=vite)
+![Tailwind](https://img.shields.io/badge/Tailwind-4-38bdf8?style=for-the-badge&logo=tailwindcss)
+
 https://anime-explorer-kappa.vercel.app
 ---
 
@@ -75,6 +80,50 @@ async function safeFetch(url: string, retries = 3, delay = 1000): Promise<any> {
   }
   // ...
 }
+```
+
+---
+
+## 🔄 State Management Strategy
+
+### AnimeContext
+
+**Purpose**: Centralized API data and pagination state
+
+**State Variables**:
+- `allAnime[]` - Full anime list
+- `animeById{}` - Cache by ID (avoids refetching)
+- `topAnime[]` - Top-rated anime
+- `page`, `topPage` - Pagination tracking
+- `fetchedPagesRef` - Prevents duplicate page fetches
+
+### FavouritesContext
+
+**Purpose**: Persist user favorites across sessions
+
+**Storage**: localStorage with cross-tab sync via `storage` event
+
+**Actions**: `toggleFavourite()`, `clearFavourites()`
+
+### Why React Context (Not Redux/Zustand)?
+
+- ✅ Simpler for this app's scope
+- ✅ No external dependencies needed
+- ✅ Built-in provider pattern fits naturally
+- ✅ Interviewers appreciate "right tool for the job" thinking
+
+---
+
+## 🖥️ UI/UX Design
+
+### Routing Structure
+
+```
+/                           → AnimeMainList (discover page)
+/anime/:id                  → AnimeDetailedPage (full info)
+/favorites                  → FavoritePage (user's collection)
+```
+
 ```
 
 ---
@@ -266,7 +315,7 @@ vercel login
 vercel --prod
 ```
 
-**Live URL**: https://anime-explorer-kappa.vercel.app
+**Live Demo**: [https://anime-explorer-kappa.vercel.app](https://anime-explorer-kappa.vercel.app)
 
 ---
 
@@ -321,11 +370,57 @@ vercel --prod
 
 ---
 
-## 🚧 Potential new features
+## 🚧 Potential New Features
 
-1. **Age appropriation and parental contro**: Implement check for adult contents
-2.  **Dark Mode Toggle**: System preference detection Local storage preference
+### 1. Age Appropriateness & Parental Controls
+Implement check for adult content with user preference settings and age gates
 
+### 2. User Accounts & Sync
+Cloud sync of favorites across devices with MyAnimeList integration
+
+### 3. Anime Watchlist & Tracking
+"Plan to Watch" status alongside favorites with episode tracking
+
+### 4. Advanced Filtering & Sorting
+Filter by year, rating, type (TV/Movie/ONA) with multiple genre selection
+
+### 5. Dark Mode Toggle
+System preference detection with local storage persistence
+
+---
+
+## 🧠 Interview Talking Points
+
+### 1. Why Context over Redux?
+
+> "For this application's scope, React Context is the right tool for the job. Redux introduces boilerplate and additional dependencies. Context provides built-in provider patterns that fit naturally with React's component model. The app doesn't need complex middleware or time-travel debugging, so Context simplifies the codebase without sacrificing maintainability."
+
+### 2. Infinite Scroll vs Load More Button
+
+> "Infinite scroll provides a smoother UX but adds complexity with scroll event handling and potential performance issues with large DOM trees. Load More is simpler to implement and gives users more control. I implemented both: infinite scroll is enabled after the first 'Load More' click, giving users the option while prioritizing initial page load performance."
+
+### 3. Rate Limiting Strategy
+
+> "The Jikan API enforces strict rate limits. I implemented exponential backoff with retries because:
+> 1. It's user-friendly (doesn't show errors for temporary rate limits)
+> 2. Exponential backoff prevents thundering herd problems
+> 3. It gracefully degrades after max retries
+> This balances API compliance with user experience."
+
+### 4. Caching Strategy
+
+> "I use a two-tier caching approach:
+> 1. Memory cache (Context state) for API responses during the session
+> 2. localStorage for persistent data (favorites)
+> The storage event listener syncs favorites across browser tabs, which is important for users who open links in new tabs."
+
+### 5. Debouncing Search
+
+> "Search needs to feel responsive but not spam the API. 250ms is the sweet spot - it feels instant to users while filtering out keystrokes. Combined with a max page limit (3 pages for search), this keeps API usage reasonable."
+
+### 6. SPA Routing on Vercel
+
+> "Single-page apps use client-side routing, which means the browser never actually requests `/favorites` from the server. Vercel's rewrite rules redirect all paths to `index.html`, allowing React Router to handle the route. This is crucial for SPA deployments."
 
 ---
 
