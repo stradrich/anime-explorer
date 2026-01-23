@@ -7,6 +7,7 @@ A React-based anime discovery application that consumes the Jikan API (MyAnimeLi
 ![Vite](https://img.shields.io/badge/Vite-7-purple?style=for-the-badge&logo=vite)
 ![Tailwind](https://img.shields.io/badge/Tailwind-4-38bdf8?style=for-the-badge&logo=tailwindcss)
 
+https://anime-explorer-kappa.vercel.app
 ---
 
 ## 🏗️ System Architecture
@@ -14,26 +15,26 @@ A React-based anime discovery application that consumes the Jikan API (MyAnimeLi
 ### High-Level Design
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                      Client (React + Vite)                   │
-├─────────────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
-│  │ AnimeContext │  │FavouritesCtx │  │     Router         │ │
-│  │  (API Data)  │  │  (LocalStorage)│ │ (React Router)    │ │
-│  └──────┬──────┘  └──────┬──────┘  └──────────┬──────────┘ │
-│         │                │                     │            │
-│         └────────────────┼─────────────────────┘            │
-│                          ▼                                  │
-│              ┌─────────────────────────┐                    │
-│              │      Jikan API Layer     │                    │
-│              │   (src/api/jikan.ts)     │                    │
-│              └─────────────────────────┘                    │
-└─────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────-----┐
+│                      Client (React + Vite)                      │
+├─────────────────────────────────────────────────────────────----┤
+│  ┌─-────────────┐  ┌──-───────────-┐  ┌─────────────────────┐   │
+│  │ AnimeContext │  │ FavouritesCtx │  │       Router        │   │
+│  │  (API Data)  │  │ (LocalStorage)│  │    (React Router)   │   │
+│  └──────┬──────-┘  └─-─────┬──────-┘  └──────────┬──────────┘   │
+│         │                  │                     │              │
+│         └───────────────--─┼─────────────────────┘              │
+│                            ▼                                    │
+│              ┌─────---────────────────────┐                     │
+│              │         Jikan API Layer    │                     │
+│              │      (src/api/jikan.ts)    │                     │
+│              └──────---───────────────────┘                     │
+└─────────────────────────────────────────────────────────────----┘
                           │
                           ▼
               ┌─────────────────────────┐
-              │    Jikan API v4         │
-              │  (api.jikan.moe)        │
+              │      Jikan API v4       │
+              │     (api.jikan.moe)     │
               └─────────────────────────┘
 ```
 
@@ -79,6 +80,50 @@ async function safeFetch(url: string, retries = 3, delay = 1000): Promise<any> {
   }
   // ...
 }
+```
+
+---
+
+## 🔄 State Management Strategy
+
+### AnimeContext
+
+**Purpose**: Centralized API data and pagination state
+
+**State Variables**:
+- `allAnime[]` - Full anime list
+- `animeById{}` - Cache by ID (avoids refetching)
+- `topAnime[]` - Top-rated anime
+- `page`, `topPage` - Pagination tracking
+- `fetchedPagesRef` - Prevents duplicate page fetches
+
+### FavouritesContext
+
+**Purpose**: Persist user favorites across sessions
+
+**Storage**: localStorage with cross-tab sync via `storage` event
+
+**Actions**: `toggleFavourite()`, `clearFavourites()`
+
+### Why React Context (Not Redux/Zustand)?
+
+- ✅ Simpler for this app's scope
+- ✅ No external dependencies needed
+- ✅ Built-in provider pattern fits naturally
+- ✅ Interviewers appreciate "right tool for the job" thinking
+
+---
+
+## 🖥️ UI/UX Design
+
+### Routing Structure
+
+```
+/                           → AnimeMainList (discover page)
+/anime/:id                  → AnimeDetailedPage (full info)
+/favorites                  → FavoritePage (user's collection)
+```
+
 ```
 
 ---
@@ -276,16 +321,16 @@ vercel --prod
 
 ## 🔧 Tech Stack
 
-| Category | Technology |
-|----------|------------|
-| Framework | React 19 + TypeScript |
-| Build Tool | Vite 7 |
-| Styling | Tailwind CSS 4 |
-| UI Components | Material UI (MUI) |
-| Routing | React Router DOM 7 |
-| Icons | React Icons (Lucide/FontAwesome) |
-| API | Fetch with custom rate-limit handling |
-| State | React Context + localStorage |
+| Category         | Technology                            |
+|------------------|---------------------------------------|
+| Framework        | React 19 + TypeScript                 |
+| Build Tool       | Vite 7                                |
+| Styling          | Tailwind CSS 4                        |
+| UI Components    | Material UI (MUI)                     |
+| Routing          | React Router DOM 7                    |
+| Icons            | React Icons (Lucide/FontAwesome)      |
+| API              | Fetch with custom rate-limit handling |
+| State            | React Context + localStorage          |
 
 ---
 
