@@ -55,6 +55,11 @@ export default function AnimeMainList() {
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
+  // Search ignores the genre filter, except that selecting an adult genre opts
+  // the search into adult titles too (the AniList fallback hides them otherwise).
+  const selectedGenreName = genreOptions.find((g) => g.mal_id === selectedGenre)?.name;
+  const adultSearch = selectedGenreName === "Hentai";
+
   // --- Fetch search results ---
   useEffect(() => {
     if (!debouncedQuery) {
@@ -65,7 +70,7 @@ export default function AnimeMainList() {
 
     let cancelled = false;
     searchLoadingRef.current = true;
-    fetchAnimeByQuery(debouncedQuery, 1)
+    fetchAnimeByQuery(debouncedQuery, 1, adultSearch)
       .then((data) => {
         if (!cancelled) setSearchResults(data);
         searchPageRef.current = 2;
@@ -73,7 +78,7 @@ export default function AnimeMainList() {
       .finally(() => (searchLoadingRef.current = false));
 
     return () => { cancelled = true };
-  }, [debouncedQuery, retryKey]);
+  }, [debouncedQuery, adultSearch, retryKey]);
 
   const fetchNextSearchPage = async () => {
     if (searchLoadingRef.current) return;
@@ -81,7 +86,7 @@ export default function AnimeMainList() {
 
     searchLoadingRef.current = true;
     try {
-      const data = await fetchAnimeByQuery(debouncedQuery, searchPageRef.current);
+      const data = await fetchAnimeByQuery(debouncedQuery, searchPageRef.current, adultSearch);
       setSearchResults((prev) => [...prev, ...data]);
       searchPageRef.current += 1;
     } catch (err) {
@@ -99,8 +104,7 @@ export default function AnimeMainList() {
     setGenreLoading(true);
     genreLoadingRef.current = true;
 
-    const genreName = genreOptions.find((g) => g.mal_id === selectedGenre)?.name;
-    fetchAnimeByCategory("genres", selectedGenre, genrePage, genreName)
+    fetchAnimeByCategory("genres", selectedGenre, genrePage, selectedGenreName)
       .then((data) => {
         if (cancelled) return;
         setAnimeList((prev) => (genrePage === 1 ? data : [...prev, ...data]));
@@ -280,6 +284,9 @@ export default function AnimeMainList() {
         No results found. If this keeps happening, the primary database (MyAnimeList)
         may be down and this {mode === "search" ? "search" : "genre"} isn't available
         on the fallback source.
+        {mode === "search" && !adultSearch && (
+          <> Adult titles only appear in search when the Hentai genre is selected.</>
+        )}
       </p>
     )}
 

@@ -168,14 +168,16 @@ export async function fetchAnimeByCategory(
 /**
  * Search anime by name
  */
-export async function searchAnime(query: string, page: number = 1): Promise<Anime[]> {
+// `adult` is only needed by the AniList fallback: Jikan's search includes adult
+// titles by default, AniList hides them unless asked explicitly.
+export async function searchAnime(query: string, page: number = 1, adult = false): Promise<Anime[]> {
   try {
     const data = await safeFetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&page=${page}`);
     if (!data) return [];
     return data.map(mapJikanAnime);
   } catch (err) {
     console.warn("Jikan unavailable, falling back to AniList:", err);
-    return anilist.fetchAnimeList({ page, search: query });
+    return anilist.fetchAnimeList({ page, search: query, adult });
   }
 }
 

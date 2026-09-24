@@ -9,7 +9,7 @@ interface AnimeContextType {
   fetchAnimeById: (id: number) => Promise<void>;
   loading: boolean;
   genreOptions: RawGenre[];
-  fetchAnimeByQuery: (query: string, page?: number) => Promise<Anime[]>;
+  fetchAnimeByQuery: (query: string, page?: number, adult?: boolean) => Promise<Anime[]>;
   topAnime: Anime[];
   fetchNextTopPage: () => Promise<void>;
   loadingTop: boolean;
@@ -78,9 +78,9 @@ export const AnimeProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-const fetchAnimeByQuery = async (query: string, page: number = 1): Promise<Anime[]> => {
+const fetchAnimeByQuery = async (query: string, page: number = 1, adult = false): Promise<Anime[]> => {
   try {
-    const results = await searchAnime(query, page);
+    const results = await searchAnime(query, page, adult);
     const seen = new Set(allAnime.map(a => a.id));
     return results.filter((anime) => !seen.has(anime.id));
   } catch (err) {
