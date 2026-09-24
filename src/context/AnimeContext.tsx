@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import type { Anime, AnimeDetail } from "../api/dataTypes";
-import { fetchAllAnime, fetchAllGenres, fetchAnimeById as fetchAnimeByIdApi, type RawGenre, fetchAllTopAnime } from "../api/jikan";
+import { fetchAllAnime, fetchAllGenres, fetchAnimeById as fetchAnimeByIdApi, type RawGenre, fetchAllTopAnime, searchAnime } from "../api/jikan";
 
 interface AnimeContextType {
   allAnime: Anime[];
@@ -13,6 +13,9 @@ interface AnimeContextType {
   topAnime: Anime[];
   fetchNextTopPage: () => Promise<void>;
   loadingTop: boolean;
+  apiError: boolean;
+  reportApiError: () => void;
+  retryFetch: () => void;
 }
 
 const AnimeContext = createContext<AnimeContextType | undefined>(undefined);
@@ -28,9 +31,10 @@ export const AnimeProvider = ({ children }: { children: ReactNode }) => {
   const [topPage, setTopPage] = useState(1);
   const [loadingTop, setLoadingTop] = useState(false);
    const fetchedTopPagesRef = useRef<Set<number>>(new Set());
+  const [apiError, setApiError] = useState(false);
 
   useEffect(() => {
-    fetchAllGenres().then(setGenreOptions);
+    fetchAllGenres().then(setGenreOptions).catch(() => setApiError(true));
   }, []);
 
    // --- Default anime pagination ---
@@ -53,6 +57,9 @@ export const AnimeProvider = ({ children }: { children: ReactNode }) => {
       setPage((p) => p + 1);
     } catch (err) {
       console.error("Failed to fetch anime:", err);
+      // allow this page to be retried
+      fetchedPagesRef.current.delete(page);
+      setApiError(true);
     } finally {
       setLoading(false);
     }
@@ -67,32 +74,18 @@ export const AnimeProvider = ({ children }: { children: ReactNode }) => {
       }
     } catch (err) {
       console.error(`Failed to fetch anime ${id}:`, err);
+      setApiError(true);
     }
   };
 
 const fetchAnimeByQuery = async (query: string, page: number = 1): Promise<Anime[]> => {
   try {
-    const response = await fetch(`https://api.jikan.moe/v4/anime?q=${query}&page=${page}`);
-    const json = await response.json();
-    if (!json.data) return [];
-
+    const results = await searchAnime(query, page);
     const seen = new Set(allAnime.map(a => a.id));
-    const uniqueNew = json.data.filter((anime: any) => !seen.has(anime.mal_id));
-
-    return uniqueNew.map((anime: any) => ({
-      id: anime.mal_id,
-      title: anime.title || "",
-      imageUrl: anime.images?.jpg?.image_url || "",
-      synopsis: anime.synopsis || "",
-      episodes: anime.episodes ?? 0,
-      score: anime.score ?? 0,
-      type: anime.type || "",
-      rating: anime.rating || "",
-      year: anime.year ?? null,
-      genres: anime.genres?.map((g: any) => g.name) || [],
-    }));
+    return results.filter((anime) => !seen.has(anime.id));
   } catch (err) {
     console.error("Failed to fetch search results:", err);
+    setApiError(true);
     return [];
   }
 };
@@ -113,6 +106,8 @@ const fetchAnimeByQuery = async (query: string, page: number = 1): Promise<Anime
       setTopPage(p => p + 1);
     } catch (err) {
       console.error("Failed to fetch top anime:", err);
+      fetchedTopPagesRef.current.delete(topPage);
+      setApiError(true);
     } finally {
       setLoadingTop(false);
     }
@@ -123,8 +118,19 @@ const fetchAnimeByQuery = async (query: string, page: number = 1): Promise<Anime
     fetchNextTopPage();
   }, []);
 
+  const reportApiError = () => setApiError(true);
+
+  const retryFetch = () => {
+    setApiError(false);
+    if (genreOptions.length === 0) {
+      fetchAllGenres().then(setGenreOptions).catch(() => setApiError(true));
+    }
+    fetchNextPage();
+    fetchNextTopPage();
+  };
+
   return (
-    <AnimeContext.Provider value={{ allAnime, animeById, fetchNextPage, fetchAnimeById, loading, genreOptions, fetchAnimeByQuery, topAnime, fetchNextTopPage, loadingTop }}>
+    <AnimeContext.Provider value={{ allAnime, animeById, fetchNextPage, fetchAnimeById, loading, genreOptions, fetchAnimeByQuery, topAnime, fetchNextTopPage, loadingTop, apiError, reportApiError, retryFetch }}>
       {children}
     </AnimeContext.Provider>
   );
