@@ -72,10 +72,15 @@ export default function AnimeMainList() {
     searchLoadingRef.current = true;
     fetchAnimeByQuery(debouncedQuery, 1, adultSearch)
       .then((data) => {
-        if (!cancelled) setSearchResults(data);
+        // A superseded query must not reset the page counter or loading flag:
+        // that re-fetched pages 2 and 3 after infinite scroll had moved on.
+        if (cancelled) return;
+        setSearchResults(data);
         searchPageRef.current = 2;
       })
-      .finally(() => (searchLoadingRef.current = false));
+      .finally(() => {
+        if (!cancelled) searchLoadingRef.current = false;
+      });
 
     return () => { cancelled = true };
   }, [debouncedQuery, adultSearch, retryKey]);
