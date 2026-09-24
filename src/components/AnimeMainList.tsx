@@ -13,7 +13,7 @@ const MAX_SEARCH_PAGE = 3;
 type Mode = "default" | "genre" | "search" | "top";
 
 export default function AnimeMainList() {
-  const { allAnime, fetchNextPage, loading: contextLoading, genreOptions, fetchAnimeByQuery, topAnime, fetchNextTopPage, loadingTop} = useAnime();
+  const { allAnime, fetchNextPage, loading: contextLoading, genreOptions, fetchAnimeByQuery, topAnime, fetchNextTopPage, loadingTop, apiError, reportApiError, retryFetch } = useAnime();
   const [mode, setMode] = useState<Mode>("default");
   // visible anime count
   const [visibleCount, setVisibleCount] = useState(ANIME_DISPLAY_COUNT);
@@ -25,12 +25,17 @@ export default function AnimeMainList() {
   const [animeList, setAnimeList] = useState<Anime[]>([]);
   const [genrePage, setGenrePage] = useState(1);
   const [genreLoading, setGenreLoading] = useState(false);
+  // false once a genre page comes back empty or fails, so infinite scroll stops paging
+  const [genreHasMore, setGenreHasMore] = useState(true);
+  const genreLoadingRef = useRef(false);
   // --- Search ---
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Anime[]>([]);
   const searchPageRef = useRef(1);
   const searchLoadingRef = useRef(false);
+  // bumped by the Retry button to re-run the genre/search effects
+  const [retryKey, setRetryKey] = useState(0);
   // --- Determine mode ---
   useEffect(() => {
     if (debouncedQuery) setMode("search");
@@ -68,7 +73,7 @@ export default function AnimeMainList() {
       .finally(() => (searchLoadingRef.current = false));
 
     return () => { cancelled = true };
-  }, [debouncedQuery]);
+  }, [debouncedQuery, retryKey]);
 
   const fetchNextSearchPage = async () => {
     if (searchLoadingRef.current) return;
@@ -92,17 +97,35 @@ export default function AnimeMainList() {
 
     let cancelled = false;
     setGenreLoading(true);
+    genreLoadingRef.current = true;
 
-    fetchAnimeByCategory("genres", selectedGenre, genrePage)
+    const genreName = genreOptions.find((g) => g.mal_id === selectedGenre)?.name;
+    fetchAnimeByCategory("genres", selectedGenre, genrePage, genreName)
       .then((data) => {
-        if (!cancelled) {
-          setAnimeList((prev) => (genrePage === 1 ? data : [...prev, ...data]));
-        }
+        if (cancelled) return;
+        setAnimeList((prev) => (genrePage === 1 ? data : [...prev, ...data]));
+        // an empty page means we've run past the last page — stop paging
+        if (data.length === 0) setGenreHasMore(false);
       })
-      .finally(() => setGenreLoading(false));
+      .catch(() => {
+        if (cancelled) return;
+        setGenreHasMore(false);
+        reportApiError();
+      })
+      .finally(() => {
+        if (cancelled) return;
+        genreLoadingRef.current = false;
+        setGenreLoading(false);
+      });
 
     return () => { cancelled = true };
-  }, [selectedGenre, genrePage]);
+  }, [selectedGenre, genrePage, retryKey]);
+
+  const handleRetry = () => {
+    retryFetch();
+    setGenreHasMore(true);
+    setRetryKey((k) => k + 1);
+  };
 
   // --- Load more button ---
   const loadMore = () => {
@@ -116,8 +139,12 @@ export default function AnimeMainList() {
   };
 
   // --- Infinite scroll ---
+  // The observer is NOT re-created on loading toggles: doing so re-fired the
+  // callback every time a fetch finished while the sentinel was still in view
+  // (e.g. an empty grid), paging endlessly and tripping API rate limits.
+  // It is torn down entirely while an API error is showing; Retry re-arms it.
   useEffect(() => {
-    if (!infiniteScrollEnabled || !loaderRef.current) return;
+    if (!infiniteScrollEnabled || apiError || !loaderRef.current) return;
 
     const observer = new IntersectionObserver((entries) => {
       if (!entries[0].isIntersecting) return;
@@ -126,13 +153,16 @@ export default function AnimeMainList() {
 
       if (mode === "default") fetchNextPage();
       else if (mode === "top") fetchNextTopPage();
-      else if (mode === "genre") setGenrePage((p) => p + 1);
+      else if (mode === "genre") {
+        if (genreLoadingRef.current) return;
+        setGenrePage((p) => p + 1);
+      }
       else if (mode === "search") fetchNextSearchPage();
     }, { rootMargin: "200px" });
 
     observer.observe(loaderRef.current);
     return () => observer.disconnect();
-  }, [infiniteScrollEnabled, mode, genreLoading, contextLoading, loadingTop]);
+  }, [infiniteScrollEnabled, mode, apiError, genreHasMore]);
 
   // --- Determine what to show ---
     const sourceAnimes =
@@ -157,6 +187,7 @@ export default function AnimeMainList() {
       setVisibleCount(ANIME_DISPLAY_COUNT);
       setGenrePage(1);
       setAnimeList([]);
+      setGenreHasMore(true);
 
       // prevent infinite scroll from firing immediately
       setInfiniteScrollEnabled(false);
@@ -208,6 +239,29 @@ export default function AnimeMainList() {
     </div>
   </div>
 
+  {/* API outage banner */}
+  {apiError && (
+    <div className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-lg border border-red-300 bg-red-50 px-4 py-3">
+      <p className="flex-1 text-red-800">
+        The anime database (Jikan / MyAnimeList) is unreachable right now, so some
+        content couldn't load. This is an upstream outage — please try again in a moment.
+      </p>
+      <Button
+        variant="outlined"
+        onClick={handleRetry}
+        sx={{
+          color: "black",
+          borderColor: "black",
+          flexShrink: 0,
+          "&:hover": { backgroundColor: "rgba(49, 49, 49, 0.08)", borderColor: "black" },
+          "&:focus": { outline: "none", boxShadow: "none" },
+        }}
+      >
+        Retry
+      </Button>
+    </div>
+  )}
+
   {/* Anime Grid */}
   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
     {visibleAnimes.map((anime: Anime, idx: number) => (
@@ -217,6 +271,17 @@ export default function AnimeMainList() {
       <LoadingSkeleton count={ANIME_DISPLAY_COUNT} />
     )}
   </div>
+
+  {/* Empty state */}
+  {visibleAnimes.length === 0 &&
+    !(contextLoading || genreLoading || searchLoadingRef.current || loadingTop) &&
+    !apiError && (
+      <p className="text-center text-gray-500 py-8">
+        No results found. If this keeps happening, the primary database (MyAnimeList)
+        may be down and this {mode === "search" ? "search" : "genre"} isn't available
+        on the fallback source.
+      </p>
+    )}
 
   {/* Load More Button */}
   {!infiniteScrollEnabled && (
@@ -243,7 +308,7 @@ export default function AnimeMainList() {
     </div>
   )}
 
-  {infiniteScrollEnabled && <div ref={loaderRef} />}
+  {infiniteScrollEnabled && !apiError && (mode !== "genre" || genreHasMore) && <div ref={loaderRef} />}
 </section>
 
   );
