@@ -144,6 +144,9 @@ export async function fetchAnimeList(opts: {
   genre?: string;
   search?: string;
   sort?: "POPULARITY_DESC" | "SCORE_DESC";
+  /** Search adult titles instead of hiding them. AniList never returns adult
+   *  entries for a search unless isAdult: true is sent explicitly. */
+  adult?: boolean;
 }): Promise<Anime[]> {
   // Resolve a MAL genre/theme name to AniList's genre or tag vocabulary
   let genre: string | undefined;
@@ -177,8 +180,9 @@ export async function fetchAnimeList(opts: {
         tag,
         search: opts.search,
         sort: opts.sort ? [opts.sort] : undefined,
-        // Hide adult entries unless the user explicitly picked an adult genre
-        isAdult: genre && ADULT_GENRES.has(genre) ? undefined : false,
+        // Hide adult entries unless the user explicitly opted in (adult genre
+        // selected). For search, AniList requires an explicit true.
+        isAdult: opts.adult ? true : genre && ADULT_GENRES.has(genre) ? undefined : false,
       }
     );
   } catch (err) {
