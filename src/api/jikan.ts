@@ -6,15 +6,17 @@
 // GET /v4/anime?q=:query&page=:page                                      → searchAnime
 //
 // Jikan is a scraper in front of MyAnimeList and goes down whenever MAL does.
-// Every fetcher here is wrapped in hedge(jikan, anilist): Jikan is preferred
-// when it answers quickly, and AniList (see anilist.ts) is raced in when Jikan
-// is slow, failing, or recently failed. AniList results carry MAL ids (idMal), so ids
+// Every fetcher here is wrapped in:
+//   cached(key, () => hedge(jikan, anilist))
+// so anything loaded once this session is instant, Jikan is preferred when it
+// answers quickly, and AniList (see anilist.ts) is raced in when Jikan is slow,
+// failing, or recently failed. AniList results carry MAL ids (idMal), so ids
 // stay consistent whichever source wins.
 
 import type { Anime, AnimeDetail } from "./dataTypes";
 import * as anilist from "./anilist";
 import { MAL_GENRES, type MalGenre } from "./genres";
-import { fetchWithTimeout, hedge, isAbort, jikanHealth, TimeoutError } from "./request";
+import { cached, fetchWithTimeout, hedge, isAbort, jikanHealth, TimeoutError } from "./request";
 
 export type RawGenre = MalGenre;
 
@@ -143,7 +145,7 @@ function jikanOrAnilist<T>(
 
 /** Fetch all anime with pagination */
 export function fetchAllAnime(page: number = 1): Promise<Anime[]> {
-  return (
+  return cached(`all:${page}`, () =>
     jikanOrAnilist(
       `anime page ${page}`,
       async (signal) => ((await safeFetch(`${JIKAN}/anime?page=${page}`, signal)) ?? []).map(mapJikanAnime),
@@ -154,7 +156,7 @@ export function fetchAllAnime(page: number = 1): Promise<Anime[]> {
 
 /** Fetch anime details by ID */
 export function fetchAnimeById(id: number): Promise<AnimeDetail | null> {
-  return (
+  return cached(`detail:${id}`, () =>
     jikanOrAnilist<AnimeDetail | null>(
       `anime ${id}`,
       async (signal) => {
@@ -190,7 +192,7 @@ export function fetchAnimeByCategory(
     }));
   };
 
-  return (
+  return cached(`genre:${id}:${page}`, () =>
     genreName
       ? jikanOrAnilist(`genre ${genreName} page ${page}`, fromJikan, (signal) =>
           anilist.fetchAnimeList({ page, genre: genreName, sort: "POPULARITY_DESC" }, signal)
@@ -205,7 +207,7 @@ export function fetchAnimeByCategory(
  */
 export function searchAnime(query: string, page: number = 1, adult = false): Promise<Anime[]> {
   const q = query.trim();
-  return (
+  return cached(`search:${q.toLowerCase()}:${adult ? 1 : 0}:${page}`, () =>
     jikanOrAnilist(
       `search "${q}" page ${page}`,
       async (signal) =>
@@ -217,7 +219,7 @@ export function searchAnime(query: string, page: number = 1, adult = false): Pro
 
 /** Fetch top anime (all pages) */
 export function fetchAllTopAnime(page: number = 1): Promise<Anime[]> {
-  return (
+  return cached(`top:${page}`, () =>
     jikanOrAnilist(
       `top anime page ${page}`,
       async (signal) => ((await safeFetch(`${JIKAN}/top/anime?page=${page}`, signal)) ?? []).map(mapJikanAnime),

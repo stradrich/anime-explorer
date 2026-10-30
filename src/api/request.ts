@@ -10,6 +10,10 @@
 //    aborting the loser. Normal days cost no extra requests; slow days feel
 //    instant. If the primary is known to be unhealthy (see jikanHealth) both
 //    are started at once.
+//
+//  - cached: session-scoped memo keyed by request (genre+page, search+page...)
+//    so anything already loaded comes back instantly, survives a reload, and
+//    costs neither API another call.
 
 // ---------------------------------------------------------------- timeout
 
@@ -145,4 +149,65 @@ export function hedge<T>(
       }
     );
   });
+}
+
+// ---------------------------------------------------------------- cache
+
+const CACHE_PREFIX = "anime-explorer:";
+const DEFAULT_TTL_MS = 30 * 60_000;
+
+interface Entry<T> {
+  t: number;
+  v: T;
+}
+
+const memory = new Map<string, Entry<unknown>>();
+const inflight = new Map<string, Promise<unknown>>();
+
+function readSession<T>(key: string): Entry<T> | null {
+  try {
+    const raw = sessionStorage.getItem(CACHE_PREFIX + key);
+    return raw ? (JSON.parse(raw) as Entry<T>) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeSession<T>(key: string, entry: Entry<T>) {
+  try {
+    sessionStorage.setItem(CACHE_PREFIX + key, JSON.stringify(entry));
+  } catch {
+    // quota exceeded or storage disabled: memory cache still works
+  }
+}
+
+/**
+ * Memoise `loader` under `key` for the session. Concurrent callers share one
+ * in-flight request. Empty / null results are not cached, so a genre that was
+ * empty on the fallback is retried once the primary source recovers.
+ */
+export async function cached<T>(key: string, loader: () => Promise<T>, ttlMs = DEFAULT_TTL_MS): Promise<T> {
+  const now = Date.now();
+  const hit = (memory.get(key) as Entry<T> | undefined) ?? readSession<T>(key);
+  if (hit && now - hit.t < ttlMs) {
+    memory.set(key, hit);
+    return hit.v;
+  }
+
+  const pending = inflight.get(key) as Promise<T> | undefined;
+  if (pending) return pending;
+
+  const p = loader()
+    .then((v) => {
+      const empty = v == null || (Array.isArray(v) && v.length === 0);
+      if (!empty) {
+        const entry = { t: Date.now(), v };
+        memory.set(key, entry);
+        writeSession(key, entry);
+      }
+      return v;
+    })
+    .finally(() => inflight.delete(key));
+  inflight.set(key, p);
+  return p;
 }
