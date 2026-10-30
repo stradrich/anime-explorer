@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import type { Anime, AnimeDetail } from "../api/dataTypes";
 import { fetchAllAnime, fetchAllGenres, fetchAnimeById as fetchAnimeByIdApi, type RawGenre, fetchAllTopAnime, searchAnime } from "../api/jikan";
+import { MAL_GENRES } from "../api/genres";
 
 interface AnimeContextType {
   allAnime: Anime[];
@@ -26,7 +27,8 @@ export const AnimeProvider = ({ children }: { children: ReactNode }) => {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const fetchedPagesRef = useRef<Set<number>>(new Set());
-  const [genreOptions, setGenreOptions] = useState<RawGenre[]>([]);
+  // Bundled list first so the dropdown is complete on first paint; refreshed from Jikan below
+  const [genreOptions, setGenreOptions] = useState<RawGenre[]>(MAL_GENRES);
   const [topAnime, setTopAnime] = useState<Anime[]>([]);
   const [topPage, setTopPage] = useState(1);
   const [loadingTop, setLoadingTop] = useState(false);
@@ -34,7 +36,7 @@ export const AnimeProvider = ({ children }: { children: ReactNode }) => {
   const [apiError, setApiError] = useState(false);
 
   useEffect(() => {
-    fetchAllGenres().then(setGenreOptions).catch(() => setApiError(true));
+    fetchAllGenres().then(setGenreOptions);
   }, []);
 
    // --- Default anime pagination ---
@@ -122,9 +124,6 @@ const fetchAnimeByQuery = async (query: string, page: number = 1, adult = false)
 
   const retryFetch = () => {
     setApiError(false);
-    if (genreOptions.length === 0) {
-      fetchAllGenres().then(setGenreOptions).catch(() => setApiError(true));
-    }
     fetchNextPage();
     fetchNextTopPage();
   };

@@ -227,8 +227,3 @@ export async function fetchAnimeDetailByMalId(id: number): Promise<AnimeDetail |
     background: "",
   };
 }
-
-export async function fetchGenreNames(): Promise<string[]> {
-  const data = await gql(`query { GenreCollection }`, {});
-  return data.GenreCollection as string[];
-}

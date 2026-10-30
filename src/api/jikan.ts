@@ -11,27 +11,29 @@
 
 import type { Anime, AnimeDetail } from "./dataTypes";
 import * as anilist from "./anilist";
+import { MAL_GENRES, type MalGenre } from "./genres";
 
-export interface RawGenre {
-  mal_id: number;
-  name: string;
-}
+export type RawGenre = MalGenre;
 
-// AniList-sourced genres get synthetic negative ids so they are never sent to
-// Jikan's ?genres= filter (which expects MAL genre ids).
+// The dropdown starts from the bundled MAL_GENRES list so it is always complete.
+// This refreshes it from Jikan once (picks up newly added MAL genres); on any
+// failure it returns the bundled list unchanged — never throws, never shrinks.
 export async function fetchAllGenres(): Promise<RawGenre[]> {
   try {
     const data = await safeFetch(`https://api.jikan.moe/v4/genres/anime`);
-    if (!data) return [];
+    if (!Array.isArray(data) || data.length < MAL_GENRES.length) return MAL_GENRES;
 
+    const known = new Map(MAL_GENRES.map((g) => [g.mal_id, g.category]));
     return data.map((g: any) => ({
       mal_id: g.mal_id,
       name: g.name,
+      // Jikan's unfiltered endpoint doesn't say which group a genre is in;
+      // unknown (new) ids are almost always themes.
+      category: known.get(g.mal_id) ?? "themes",
     }));
   } catch (err) {
-    console.warn("Jikan genres unavailable, falling back to AniList:", err);
-    const names = await anilist.fetchGenreNames();
-    return names.map((name, i) => ({ mal_id: -(i + 1), name }));
+    console.warn("Jikan genres unavailable, using bundled list:", err);
+    return MAL_GENRES;
   }
 }
 
@@ -141,12 +143,6 @@ export async function fetchAnimeByCategory(
   page: number = 1,
   genreName?: string
 ): Promise<Anime[]> {
-  // Synthetic (AniList-sourced) genre id — Jikan can't resolve it, go straight to AniList
-  if (id < 0) {
-    if (!genreName) return [];
-    return anilist.fetchAnimeList({ page, genre: genreName, sort: "POPULARITY_DESC" });
-  }
-
   let data: any;
   try {
     data = await safeFetch(`https://api.jikan.moe/v4/anime?genres=${id}&order_by=popularity&sort=desc&page=${page}`);
