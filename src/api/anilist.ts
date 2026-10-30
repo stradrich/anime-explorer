@@ -3,6 +3,7 @@
 // entries without a MAL id are dropped to keep detail-page lookups working.
 
 import type { Anime, AnimeDetail } from "./dataTypes";
+import { fetchWithTimeout, isAbort } from "./request";
 
 const ANILIST_URL = "https://graphql.anilist.co";
 
@@ -86,20 +87,32 @@ const FORMAT_LABELS: Record<string, string> = {
 // transient: back off and retry a couple of times before giving up.
 const RETRY_DELAYS_MS = [2000, 5000];
 
-async function gql(query: string, variables: Record<string, unknown>, attempt = 0): Promise<any> {
+async function gql(
+  query: string,
+  variables: Record<string, unknown>,
+  signal?: AbortSignal,
+  attempt = 0
+): Promise<any> {
   let res: Response;
   try {
-    res = await fetch(ANILIST_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ query, variables }),
-    });
+    res = await fetchWithTimeout(
+      ANILIST_URL,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ query, variables }),
+      },
+      8000,
+      signal
+    );
   } catch (err) {
+    // Aborted because the other source already answered: stop quietly.
+    if (signal?.aborted || isAbort(err)) throw err;
     if (attempt < RETRY_DELAYS_MS.length) {
       const delay = RETRY_DELAYS_MS[attempt];
       console.warn(`AniList unreachable or rate limited. Retrying in ${delay}ms...`);
       await new Promise((r) => setTimeout(r, delay));
-      return gql(query, variables, attempt + 1);
+      return gql(query, variables, signal, attempt + 1);
     }
     throw new Error(`AniList request failed: ${err instanceof Error ? err.message : String(err)}`);
   }
@@ -109,7 +122,7 @@ async function gql(query: string, variables: Record<string, unknown>, attempt = 
     const delay = Math.min(retryAfter || RETRY_DELAYS_MS[attempt], 10_000);
     console.warn(`Rate limited by AniList. Retrying in ${delay}ms...`);
     await new Promise((r) => setTimeout(r, delay));
-    return gql(query, variables, attempt + 1);
+    return gql(query, variables, signal, attempt + 1);
   }
 
   const json = await res.json().catch(() => null);
@@ -147,7 +160,7 @@ export async function fetchAnimeList(opts: {
   /** Search adult titles instead of hiding them. AniList never returns adult
    *  entries for a search unless isAdult: true is sent explicitly. */
   adult?: boolean;
-}): Promise<Anime[]> {
+}, signal?: AbortSignal): Promise<Anime[]> {
   // Resolve a MAL genre/theme name to AniList's genre or tag vocabulary
   let genre: string | undefined;
   let tag: string | undefined;
@@ -183,7 +196,8 @@ export async function fetchAnimeList(opts: {
         // Hide adult entries unless the user explicitly opted in (adult genre
         // selected). For search, AniList requires an explicit true.
         isAdult: opts.adult ? true : genre && ADULT_GENRES.has(genre) ? undefined : false,
-      }
+      },
+      signal
     );
   } catch (err) {
     // A MAL genre with no AniList equivalent → empty result, not an outage
@@ -197,7 +211,7 @@ export async function fetchAnimeList(opts: {
   return data.Page.media.filter((m: any) => m.idMal).map(toAnime);
 }
 
-export async function fetchAnimeDetailByMalId(id: number): Promise<AnimeDetail | null> {
+export async function fetchAnimeDetailByMalId(id: number, signal?: AbortSignal): Promise<AnimeDetail | null> {
   let data: any;
   try {
     data = await gql(
@@ -208,7 +222,8 @@ export async function fetchAnimeDetailByMalId(id: number): Promise<AnimeDetail |
           studios { nodes { name isAnimationStudio } }
         }
       }`,
-      { idMal: id }
+      { idMal: id },
+      signal
     );
   } catch (err) {
     if (err instanceof Error && err.message.includes("Not Found")) return null;
