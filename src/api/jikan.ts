@@ -23,13 +23,14 @@ export async function fetchAllGenres(): Promise<RawGenre[]> {
     const data = await safeFetch(`https://api.jikan.moe/v4/genres/anime`);
     if (!Array.isArray(data) || data.length < MAL_GENRES.length) return MAL_GENRES;
 
-    const known = new Map(MAL_GENRES.map((g) => [g.mal_id, g.category]));
+    const known = new Map(MAL_GENRES.map((g) => [g.mal_id, g]));
     return data.map((g: any) => ({
       mal_id: g.mal_id,
       name: g.name,
       // Jikan's unfiltered endpoint doesn't say which group a genre is in;
       // unknown (new) ids are almost always themes.
-      category: known.get(g.mal_id) ?? "themes",
+      category: known.get(g.mal_id)?.category ?? "themes",
+      aka: known.get(g.mal_id)?.aka,
     }));
   } catch (err) {
     console.warn("Jikan genres unavailable, using bundled list:", err);

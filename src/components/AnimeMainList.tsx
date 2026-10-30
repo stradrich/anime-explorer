@@ -5,7 +5,7 @@ import type { Anime } from "../api/dataTypes";
 import { useAnime } from "../context/AnimeContext";
 import { useEffect, useRef, useState } from "react";
 import { fetchAnimeByCategory } from "../api/jikan";
-import { GENRE_CATEGORY_LABELS, type GenreCategory } from "../api/genres";
+import { GENRE_CATEGORY_LABELS, genreLabel, type GenreCategory } from "../api/genres";
 import Button from "@mui/material/Button";
 
 const ANIME_DISPLAY_COUNT = 8;
@@ -235,7 +235,7 @@ export default function AnimeMainList() {
             <optgroup key={category} label={GENRE_CATEGORY_LABELS[category]}>
               {entries.map((genre) => (
                 <option key={genre.mal_id} value={genre.mal_id}>
-                  {genre.name}
+                  {genreLabel(genre)}
                 </option>
               ))}
             </optgroup>

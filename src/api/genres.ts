@@ -13,9 +13,14 @@ export type GenreCategory = "genres" | "explicit_genres" | "themes" | "demograph
 
 export interface MalGenre {
   mal_id: number;
+  /** MAL's official name. Drives the AniList mapping, so never change it for display. */
   name: string;
   category: GenreCategory;
+  /** Better-known alternate name, shown in brackets in the dropdown. */
+  aka?: string;
 }
+
+export const genreLabel = (g: MalGenre) => (g.aka ? `${g.name} (${g.aka})` : g.name);
 
 export const GENRE_CATEGORY_LABELS: Record<GenreCategory, string> = {
   genres: "Genres",
@@ -30,11 +35,11 @@ export const MAL_GENRES: MalGenre[] = [
   { mal_id: 2, name: "Adventure", category: "genres" },
   { mal_id: 5, name: "Avant Garde", category: "genres" },
   { mal_id: 46, name: "Award Winning", category: "genres" },
-  { mal_id: 28, name: "Boys Love", category: "genres" },
+  { mal_id: 28, name: "Boys Love", category: "genres", aka: "Yaoi" },
   { mal_id: 4, name: "Comedy", category: "genres" },
   { mal_id: 8, name: "Drama", category: "genres" },
   { mal_id: 10, name: "Fantasy", category: "genres" },
-  { mal_id: 26, name: "Girls Love", category: "genres" },
+  { mal_id: 26, name: "Girls Love", category: "genres", aka: "Yuri" },
   { mal_id: 47, name: "Gourmet", category: "genres" },
   { mal_id: 14, name: "Horror", category: "genres" },
   { mal_id: 7, name: "Mystery", category: "genres" },
